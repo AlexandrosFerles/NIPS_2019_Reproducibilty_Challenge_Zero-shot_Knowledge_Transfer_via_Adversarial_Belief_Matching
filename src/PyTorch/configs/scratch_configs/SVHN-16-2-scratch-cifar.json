@@ -1,0 +1,11 @@
+{
+  "training":{
+    "dataset": "SVHN",
+    "wrn_depth": 16,
+    "wrn_width": 2,
+    "seeds": "012",
+    "checkpoint": "True",
+    "log": "True",
+    "logfile": "wrn-40-2-scratch-svhn.txt"
+  }
+}
