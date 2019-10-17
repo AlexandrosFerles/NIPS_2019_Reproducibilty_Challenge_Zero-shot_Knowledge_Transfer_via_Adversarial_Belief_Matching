@@ -62,7 +62,7 @@ def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', c
                 correct += (predicted == labels).sum().item()
 
             epoch_accuracy = correct / total
-            epoch_accuracy = round(100 * epoch_accuracy, 4)
+            epoch_accuracy = round(100 * epoch_accuracy, 2)
 
             if log:
                 with open(logfile, 'a') as temp:
