@@ -122,15 +122,10 @@ def train(args):
                 temp.write('------------------- SEED {} -------------------\n'.format(seed))
 
         strides = [1, 1, 2, 2]
-        net = WideResNet(d=wrn_depth, k=wrn_width, n_classes=10, input_features=3, output_features=16,
-                         strides=strides)
+        net = WideResNet(d=wrn_depth, k=wrn_width, n_classes=10, input_features=3, output_features=16, strides=strides)
         net = net.to(device)
 
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
-
-        checkpointFile = '_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, dataset,
-                                                                 seed) if checkpoint else ''
+        checkpointFile = '_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, dataset, seed) if checkpoint else ''
         best_test_set_accuracy = _train_seed(net, loaders, device, log, checkpoint, logfile, checkpointFile)
 
         if log:
@@ -147,9 +142,7 @@ def train(args):
 
     if log:
         with open(logfile, 'a') as temp:
-            temp.write(
-                'Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy,
-                                                                                            std_test_set_accuracy))
+            temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
 
 
 if __name__ == '__main__':

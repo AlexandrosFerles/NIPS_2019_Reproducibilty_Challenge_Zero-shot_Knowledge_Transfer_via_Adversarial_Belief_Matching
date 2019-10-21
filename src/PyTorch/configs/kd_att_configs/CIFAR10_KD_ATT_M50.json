@@ -1,0 +1,13 @@
+{
+  "training":{
+    "dataset": "CIFAR10",
+    "wrn_depth_teacher": 40,
+    "wrn_width_teacher": 2,
+    "wrn_depth_student": 16,
+    "wrn_width_student": 1,
+    "M": 50,
+    "seeds": "012",
+    "checkpoint": "True",
+    "log": "True"
+  }
+}
