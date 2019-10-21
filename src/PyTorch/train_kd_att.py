@@ -154,6 +154,7 @@ def train(args):
         teacher_net = WideResNet(d=wrn_depth_teacher, k=wrn_width_teacher, n_classes=10, input_features=3, output_features=16, strides=strides)
         teacher_net = teacher_net.to(device)
         temp_dataset_name = 'CIFAR10' if dataset =='cifar10' else 'SVHN'
+        # TODO: Needs fix for SVHN!
         torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/{}/wrn-{}-{}-seed-{}-dict.pth'.format(temp_dataset_name, wrn_depth_teacher, wrn_width_teacher, seed))
         teacher_net.load_state_dict(torch_checkpoint)
         
