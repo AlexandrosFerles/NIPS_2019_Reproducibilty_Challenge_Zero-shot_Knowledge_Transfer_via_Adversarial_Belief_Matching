@@ -1,43 +1,11 @@
-import os
 import torch
 from torch import optim
-import torch.nn as nn
-import torch.nn.functional as F
 import numpy as np
-import random
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
-from utils import adjust_learning_rate_scratch
+from utils import adjust_learning_rate_scratch, kd_att_loss
 
 from train_scratches import set_seed
-
-
-def attention_loss(att1, att2):
-
-    # derive l2 norm of each attention map
-    att1_norm = F.normalize(att1)
-    att2_norm = F.normalize(att2)
-
-    # Loss now is just the p2-norm of the normalized attention maps!
-    loss = torch.sqrt(torch.sum((att1_norm - att2_norm).pow(2)))
-    return loss
-
-
-def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, criterion1=nn.CrossEntropyLoss(), criterion2=nn.KLDivLoss()):
-
-    student_out, student_activations = student_outputs[0], student_outputs[1:]
-    teacher_out, teacher_activations = teacher_outputs[0], teacher_outputs[1:]
-
-    activation_pairs = zip(student_activations, teacher_activations)
-
-    loss_term1 = (1-a) * criterion1(student_out, labels)
-    # changed to log softmax for student_out and 2a for loss_term2 after inspection of the official code
-    loss_term2 = criterion2(F.log_softmax(student_out/T), F.softmax(teacher_out/T))
-    loss_term2 *= (T**2)*2*a
-    attention_losses = [attention_loss(att1, att2) for (att1, att2) in activation_pairs]
-    loss_term3 = (b/2) * sum(attention_losses)
-
-    return loss_term1 + loss_term2 + loss_term3
 
 
 def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
@@ -129,20 +97,8 @@ def train(args):
 
     checkpoint = bool(kd_att_configurations.checkpoint)
 
-    if dataset == 'cifar10':
-
-        from utils import cifar10loaders
-        loaders = cifar10loaders()
-
-    elif dataset == 'svhn':
-
-        from utils import svhnLoaders
-        loaders = svhnLoaders()
-    else:
-        ValueError('Datasets to choose from: CIFAR10 and SVHN')
-
     if torch.cuda.is_available():
-        device = torch.device('cuda:2')
+        device = torch.device('cuda:0')
     else:
         device = torch.device('cpu')
 
@@ -151,6 +107,37 @@ def train(args):
     for seed in seeds:
 
         set_seed(seed)
+
+        if dataset == 'cifar10':
+
+            # Full data
+            if M == 5000:
+                from utils import cifar10loaders
+                loaders = cifar10loaders()
+            # No data
+            elif M == 0:
+                from utils import cifar10loaders
+                _, test_loader = cifar10loaders
+            else:
+                from utils import cifar10loadersM
+                loaders = cifar10loadersM(M)
+
+        elif dataset == 'svhn':
+
+            # Full data
+            if M == 5000:
+                from utils import svhnLoaders
+                loaders = svhnLoaders()
+            # No data
+            elif M == 0:
+                from utils import svhnloaders
+                _, test_loader = svhnloaders
+            else:
+                from utils import svhnloadersM
+                loaders = svhnloadersM(M)
+
+        else:
+            ValueError('Datasets to choose from: CIFAR10 and SVHN')
 
         if log:
             with open(logfile, 'a') as temp:
@@ -165,27 +152,51 @@ def train(args):
         else:
             torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
         teacher_net.load_state_dict(torch_checkpoint)
-        
+
         student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3, output_features=16, strides=strides)
         student_net = student_net.to(device)
 
         checkpointFile = 'kd_att_teacher_wrn-{}-{}_student_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, dataset, seed) if checkpoint else ''
-        best_test_set_accuracy = _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
+        if M != 0:
 
-        if log:
-            with open(logfile, 'a') as temp:
-                temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
+            best_test_set_accuracy = _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
 
-        test_set_accuracies.append(best_test_set_accuracy)
+            if log:
+                with open(logfile, 'a') as temp:
+                    temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
-        if log:
-            with open(logfile, 'a') as temp:
-                temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
+            test_set_accuracies.append(best_test_set_accuracy)
 
-    mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
+            if log:
+                with open(logfile, 'a') as temp:
+                    temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
+
+            mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
+
+        else:
+
+            with torch.no_grad():
+
+                correct = 0
+                total = 0
+
+                student_net.eval()
+                for data in test_loader:
+                    images, labels = data
+                    images = images.to(device)
+                    labels = labels.to(device)
+
+                    student_net(images)
+                    outputs = student_net(images)[0]
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item()
+
+                best_test_set_accuracy = correct / total
+                best_test_set_accuracy = round(100 * best_test_set_accuracy, 2)
+
+                test_set_accuracies.append(best_test_set_accuracy)
 
     if log:
         with open(logfile, 'a') as temp:
-            temp.write(
-                'Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy,
-                                                                                            std_test_set_accuracy))
+            temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
