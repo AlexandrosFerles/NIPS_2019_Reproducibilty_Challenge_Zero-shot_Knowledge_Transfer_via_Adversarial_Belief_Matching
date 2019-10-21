@@ -12,9 +12,14 @@ from utils import adjust_learning_rate_scratch
 from train_scratches import set_seed
 
 
-def attention_loss(att1, att2) :
-    # TODO: Implement the attention loss between the pairs
-    loss = 0
+def attention_loss(att1, att2):
+
+    # derive l2 norm of each attention map
+    att1_norm = F.normalize(att1)
+    att2_norm = F.normalize(att2)
+
+    # Loss now is just the p2-norm of the normalized attention maps!
+    loss = torch.sqrt(torch.sum((att1_norm - att2_norm).pow(2)))
     return loss
 
 
@@ -26,7 +31,9 @@ def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, cr
     activation_pairs = zip(student_activations, teacher_activations)
 
     loss_term1 = (1-a) * criterion1(student_out, labels)
-    loss_term2 = criterion2(F.softmax(student_out/T), F.softmax(teacher_out/T))
+    # changed to log softmax for student_out and 2a for loss_term2 after inspection of the official code
+    loss_term2 = criterion2(F.log_softmax(student_out/T), F.softmax(teacher_out/T))
+    loss_term2 *= (T**2)*2*a
     attention_losses = [attention_loss(att1, att2) for (att1, att2) in activation_pairs]
     loss_term3 = (b/2) * sum(attention_losses)
 
@@ -107,16 +114,16 @@ def train(args):
 
     M = kd_att_configurations.M
 
-    dataset = kd_att_configurations.dataset.lower()
+    dataset = kd_att_configurations.dataset
     seeds = [int(seed) for seed in kd_att_configurations.seeds]
     log = bool(kd_att_configurations.checkpoint)
 
     if log:
-        logfile = kd_att_configurations.logfile
+        teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
+        student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
+        logfile = 'Teacher-{}-Student-{}-{}-M={}'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
         with open(logfile, 'w') as temp:
-            teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
-            student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
-            temp.write('KD_ATT with teacher {} and student {} in {}\n'.format(teacher_str, student_str, kd_att_configurations.dataset))
+            temp.write('KD_ATT with teacher {} and student {} in {} with M=\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
     else:
         logfile = ''
 
@@ -153,9 +160,10 @@ def train(args):
 
         teacher_net = WideResNet(d=wrn_depth_teacher, k=wrn_width_teacher, n_classes=10, input_features=3, output_features=16, strides=strides)
         teacher_net = teacher_net.to(device)
-        temp_dataset_name = 'CIFAR10' if dataset =='cifar10' else 'SVHN'
-        # TODO: Needs fix for SVHN!
-        torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/{}/wrn-{}-{}-seed-{}-dict.pth'.format(temp_dataset_name, wrn_depth_teacher, wrn_width_teacher, seed))
+        if dataset == 'cifar10':
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
+        else:
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
         teacher_net.load_state_dict(torch_checkpoint)
         
         student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3, output_features=16, strides=strides)
