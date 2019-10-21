@@ -171,8 +171,6 @@ def train(args):
                 with open(logfile, 'a') as temp:
                     temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
-            mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
-
         else:
 
             with torch.no_grad():
@@ -196,6 +194,8 @@ def train(args):
                 best_test_set_accuracy = round(100 * best_test_set_accuracy, 2)
 
                 test_set_accuracies.append(best_test_set_accuracy)
+
+    mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
 
     if log:
         with open(logfile, 'a') as temp:
