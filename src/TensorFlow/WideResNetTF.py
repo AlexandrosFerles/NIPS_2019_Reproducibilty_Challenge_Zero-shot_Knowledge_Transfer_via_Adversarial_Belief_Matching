@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers
-import math
+import random
+import numpy as np
 
 # Clear notebook
 tf.keras.backend.clear_session()
@@ -16,15 +17,15 @@ class WideResBlock1(layers.Layer):
         self.batch_norm1 = layers.BatchNormalization()
         self.batch_norm2 = layers.BatchNormalization()
 
-        self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False)
-        self.conv2 = layers.Conv2D(output_features, kernel_size=3, strides=1, padding='same', use_bias=False)
+        self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False, data_format='channels_first')
+        self.conv2 = layers.Conv2D(output_features, kernel_size=3, strides=1, padding='same', use_bias=False, data_format='channels_first')
 
         self.subsample_input = subsample_input
         self.increase_filters = increase_filters
         if subsample_input:
-            self.conv_inp = layers.Conv2D(output_features, kernel_size=1, strides=2, padding='valid', use_bias=False)
+            self.conv_inp = layers.Conv2D(output_features, kernel_size=1, strides=2, padding='valid', use_bias=False, data_format='channels_first')
         elif increase_filters:
-            self.conv_inp = layers.Conv2D(output_features, kernel_size=1, strides=1, padding='valid', use_bias=False)
+            self.conv_inp = layers.Conv2D(output_features, kernel_size=1, strides=1, padding='valid', use_bias=False, data_format='channels_first')
 
 
     @tf.function
@@ -55,8 +56,8 @@ class WideResBlock(layers.Layer):
         self.batch_norm1 = layers.BatchNormalization()
         self.batch_norm2 = layers.BatchNormalization()
 
-        self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False)
-        self.conv2 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False)
+        self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False, data_format='channels_first')
+        self.conv2 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False, data_format='channels_first')
 
         @tf.function
         def call(self, x):
@@ -74,12 +75,10 @@ class Nblocks(tf.keras.Model):
     def __init__(self, N, input_features, output_features, stride, subsample_input, increase_filters):
         super(Nblocks, self).__init__()
 
-        layers = []
-        layers.append(WideResBlock1(input_features, output_features, stride, subsample_input, increase_filters))
+        self.NblockLayers = tf.keras.Sequential()
+        self.NblockLayers.add(WideResBlock1(input_features, output_features, stride, subsample_input, increase_filters))
         for i in range(1, N):
-            layers.append(WideResBlock(output_features, output_features, stride=1))
-
-        self.NblockLayers = tf.keras.Sequential(layers)
+            self.NblockLayers.add(WideResBlock(output_features, output_features, stride=1))
 
     @tf.function
     def call(self, x):
@@ -89,7 +88,7 @@ class WideResNet(tf.keras.Model):
 
     def __init__(self, d, k, n_classes, input_features, output_features, strides):
         super(WideResNet, self).__init__()
-        self.conv1 = layers.Conv2D(filters=output_features, kernel_size=3, strides=strides[0], padding='same', use_bias=False)
+        self.conv1 = layers.Conv2D(filters=output_features, kernel_size=3, strides=strides[0], padding='same', use_bias=False, data_format='channels_first')
 
         filters = [16 * k, 32 * k, 64 * k]
         self.out_filters = filters[-1]
@@ -105,7 +104,7 @@ class WideResNet(tf.keras.Model):
 
         self.batch_norm = layers.BatchNormalization()
         self.activation = layers.ReLU()
-        self.avg_pool = layers.AveragePooling2D(pool_size=8)
+        self.avg_pool = layers.AveragePooling2D(pool_size=8, data_format='channels_first')
         self.fc = layers.Dense(n_classes)
 
         # for m in self.get_weights():
@@ -127,7 +126,7 @@ class WideResNet(tf.keras.Model):
         out = self.batch_norm(attention3)
         out = self.activation(out)
         out = self.avg_pool(out)
-        out = out.reshape(-1, self.out_filters)
+        out = tf.reshape(out, (-1, self.out_filters))
 
         return self.fc(out), attention1, attention2, attention3
 
@@ -141,8 +140,12 @@ class WideResNet(tf.keras.Model):
 
 
 if __name__=='__main__':
+    random.seed(0)
+    np.random.seed(0)
+    tf.random.set_seed(0)
+
     # For debugging
-    tf.config.experimental_run_functions_eagerly(True)
+    #tf.config.experimental_run_functions_eagerly(True)
 
     # change d and k if you want to check a model other than WRN-40-2
     d = 40
@@ -152,7 +155,11 @@ if __name__=='__main__':
 
     # verify that an output is produced
     sample_input = tf.ones([1, 3, 32, 32])
-    net(sample_input)
+    out = net(sample_input)[0]
+    print(out)
 
     # Summarize model
     net.summary()
+    net.block1.summary()
+    net.block2.summary()
+    net.block3.summary()
