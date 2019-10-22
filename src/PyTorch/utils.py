@@ -184,7 +184,7 @@ def generator_loss(student_outputs, teacher_outputs, criterion=nn.KLDivLoss(), T
     return gen_loss
 
 
-def student_loss_zero_shot(student_outputs, teacher_outputs, b):
+def student_loss_zero_shot(student_outputs, teacher_outputs, b=250):
 
     student_out, student_activations = student_outputs[0], student_outputs[1:]
     teacher_out, teacher_activations = teacher_outputs[0], teacher_outputs[1:]
