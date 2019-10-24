@@ -1,10 +1,12 @@
 import os
-import torch
 import numpy as np
 import random
+
+from keras_preprocessing.image import ImageDataGenerator
+
+from tf_utils import CustomLearningRateScheduler
 from utils import json_file_to_pyobj
 from WideResNetTF import WideResNet
-from utils import adjust_learning_rate_scratch
 import tensorflow as tf
 
 
@@ -25,6 +27,9 @@ def train_step(images, labels, model, optimizer, train_loss, train_accuracy):
     train_loss(loss)
     train_accuracy(labels, predictions)
 
+    template = ' Loss: {}, Accuracy: {}'
+    print(template.format(train_loss.result(), train_accuracy.result() * 100))
+
 
 @tf.function
 def test_step(images, labels, model, test_loss, test_accuracy):
@@ -37,6 +42,13 @@ def test_step(images, labels, model, test_loss, test_accuracy):
 
 def loss_object(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits)
+
+
+def learning_rate_schedule(current_lr, epoch):
+    if epoch == 60 or epoch == 120 or epoch == 160:
+        return current_lr / 5
+    else:
+        return current_lr
 
 
 def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpointFile=''):
@@ -64,6 +76,11 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
         print("Initializing from scratch.")
 
     for epoch in range(epochs):
+
+        # update learning rate with scheduler
+        new_lr = learning_rate_schedule(current_lr=optimizer.get_config()['learning_rate'], epoch=epoch)
+        optimizer.learning_rate = new_lr
+
         for images, labels in train_ds:
             train_step(images, labels, model, optimizer, train_loss, train_accuracy)
 
@@ -98,6 +115,50 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
     return best_test_set_accuracy
 
 
+def _train_seed_amateur(model, loaders, log=False, checkpoint=False, logfile='', checkpointFile=''):
+    (x_train, y_train), (x_test, y_test) = loaders
+
+    lr_decay = CustomLearningRateScheduler(initial_lr=0.1)
+
+    callbacks = [lr_decay]
+    # callbacks = []
+
+    optimizer = tf.keras.optimizers.SGD(learning_rate=0.1, momentum=0.9, nesterov=True)
+
+    model.build(input_shape=(None,) + x_train[0].shape)
+    model.summary()
+
+    model.compile(optimizer=optimizer, loss=tf.keras.losses.sparse_categorical_crossentropy,
+                  metrics=[tf.keras.metrics.sparse_categorical_accuracy])
+
+    image_gen = ImageDataGenerator(featurewise_center=False,
+                                   featurewise_std_normalization=False,
+                                   data_format='channels_last')
+    image_gen.fit(x_train)
+
+    history = model.fit(x_train, y_train, epochs=200, batch_size=128, validation_split=0.1,
+                        callbacks=callbacks)
+
+    # history = model.fit(x_train, y_train, epochs=200, batch_size=128, validation_split=0.1, callbacks=callbacks,
+    #                     verbose=1)
+
+    loss, acc = model.evaluate(x_test, y_test)
+
+    results = history.history
+
+    filename = 'history_epochs{4}_{0}_batchsize{1}_eta{2}_{3}'.format(args.dataset,
+                                                                      args.batch_size,
+                                                                      str(args.learning_rate).replace('.', '_'),
+                                                                      model.get_filename(),
+                                                                      args.epochs)
+
+    results['test_loss'] = loss
+    results['test_acc'] = acc
+
+    print('test loss is {} and acc is {}'.format(loss, acc))
+    return acc
+
+
 def train(args):
     json_options = json_file_to_pyobj(args.config)
     training_configurations = json_options.training
@@ -117,21 +178,22 @@ def train(args):
 
     checkpoint = bool(training_configurations.checkpoint)
 
-    if dataset == 'cifar10':
-
-        from utils import cifar10loaders
-        loaders = cifar10loaders()
-
-    elif dataset == 'svhn':
-
-        from utils import svhnLoaders
-        loaders = svhnLoaders()
-    else:
-        ValueError('Datasets to choose from: CIFAR10 and SVHN')
-
     test_set_accuracies = []
 
     for seed in seeds:
+
+        if dataset == 'cifar10':
+
+            from tf_utils import cifar10loaders
+            loaders = cifar10loaders(seed=seed)
+
+        elif dataset == 'svhn':
+
+            from utils import svhnLoaders
+            loaders = svhnLoaders()
+        else:
+            ValueError('Datasets to choose from: CIFAR10 and SVHN')
+
         set_seed(seed)
 
         if log:
@@ -144,6 +206,7 @@ def train(args):
         checkpointFile = '_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, dataset,
                                                                  seed) if checkpoint else ''
         best_test_set_accuracy = _train_seed(model, loaders, log, checkpoint, logfile, checkpointFile)
+        # best_test_set_accuracy = _train_seed_amateur(model, loaders, log, checkpoint, logfile, checkpointFile)
 
         if log:
             with open(logfile, 'a') as temp:

@@ -1,15 +1,20 @@
 import tensorflow as tf
+from keras.regularizers import l2
 from tensorflow.keras import layers
 import random
 import numpy as np
 import math
+
+
+WEIGHT_DECAY = 5e-4
+KERNEL_INIT = 'glorot_normal'
 
 # Clear notebook
 tf.keras.backend.clear_session()
 
 
 # Check that GPU is used
-# tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.list_physical_devices('GPU')
 
 class WideResBlock1(layers.Layer):
 
@@ -20,15 +25,20 @@ class WideResBlock1(layers.Layer):
         self.batch_norm1 = layers.BatchNormalization()
         self.batch_norm2 = layers.BatchNormalization()
 
-        self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False)
-        self.conv2 = layers.Conv2D(output_features, kernel_size=3, strides=1, padding='same', use_bias=False)
+        self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False,
+                                   kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
+
+        self.conv2 = layers.Conv2D(output_features, kernel_size=3, strides=1, padding='same', use_bias=False,
+                                   kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
 
         self.subsample_input = subsample_input
         self.increase_filters = increase_filters
         if subsample_input:
-            self.conv_inp = layers.Conv2D(output_features, kernel_size=1, strides=2, padding='valid', use_bias=False)
+            self.conv_inp = layers.Conv2D(output_features, kernel_size=1, strides=2, padding='valid', use_bias=False,
+                                          kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
         elif increase_filters:
-            self.conv_inp = layers.Conv2D(output_features, kernel_size=1, strides=1, padding='valid', use_bias=False)
+            self.conv_inp = layers.Conv2D(output_features, kernel_size=1, strides=1, padding='valid', use_bias=False,
+                                          kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
 
     @tf.function
     def call(self, x):
@@ -59,8 +69,10 @@ class WideResBlock(layers.Layer):
         self.batch_norm1 = layers.BatchNormalization()
         self.batch_norm2 = layers.BatchNormalization()
 
-        self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False)
-        self.conv2 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False)
+        self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False,
+                                   kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
+        self.conv2 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False,
+                                   kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
 
     @tf.function
     def call(self, x):
@@ -98,7 +110,7 @@ class WideResNet(tf.keras.Model):
     def __init__(self, d, k, n_classes, output_features, strides):
         super(WideResNet, self).__init__()
         self.conv1 = layers.Conv2D(filters=output_features, kernel_size=3, strides=strides[0], padding='same',
-                                   use_bias=False)
+                                   use_bias=False, kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
 
         filters = [16 * k, 32 * k, 64 * k]
         self.out_filters = filters[-1]
@@ -115,7 +127,7 @@ class WideResNet(tf.keras.Model):
         self.batch_norm = layers.BatchNormalization()
         self.activation = layers.ReLU()
         self.avg_pool = layers.AveragePooling2D(pool_size=8)
-        self.fc = layers.Dense(n_classes)
+        self.fc = layers.Dense(n_classes, kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
 
     @tf.function
     def call(self, x):
@@ -144,16 +156,6 @@ if __name__ == '__main__':
     k = 2
     strides = [1, 1, 2, 2]
     net = WideResNet(d=d, k=k, n_classes=10, output_features=16, strides=strides)
-
-    # for m in net.get_weights():
-    #     if isinstance(m, layers.Conv2D):
-    #         n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
-    #         m.weight.data.normal_(0, math.sqrt(2. / n))
-    #     elif isinstance(m, layers.BatchNorm2d):
-    #         m.get_weights.data.fill_(1)
-    #         m.bias.data.zero_()
-    #     elif isinstance(m, layers.Dense):
-    #         m.bias.data.zero_()
 
     # verify that an output is produced
     sample_input = tf.ones([1, 32, 32, 3])
