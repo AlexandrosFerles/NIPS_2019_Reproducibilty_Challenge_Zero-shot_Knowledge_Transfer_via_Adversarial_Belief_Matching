@@ -4,7 +4,7 @@ import random
 from keras_preprocessing.image import ImageDataGenerator
 
 from tf_utils import CustomLearningRateScheduler
-from utils import json_file_to_pyobj
+from tf_utils import json_file_to_pyobj
 from WideResNetTF import WideResNet
 import tensorflow as tf
 
