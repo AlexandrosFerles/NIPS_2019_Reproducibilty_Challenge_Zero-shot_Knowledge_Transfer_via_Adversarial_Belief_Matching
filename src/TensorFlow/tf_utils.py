@@ -44,6 +44,10 @@ def apply_transformations(x_train, x_test, seed=42):
     x_test[:, :, :, 2] = (x_test[:, :, :, 2] - 0.4728) / 0.1970
 
     # for index, image in enumerate(x_train):
+    #
+    #     if index % 5000 == 0:
+    #         print('preprocessed ', index)
+    #
     #     im = pad(image)
     #     im = crop(im, (32, 32, 3))
     #     im = flip_upside_down(im, seed)
@@ -61,17 +65,35 @@ def cifar10loaders(train_batch_size=128, test_batch_size=10, seed=42):
     # Tuple of Numpy arrays
     (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
 
-    # x_train, x_test = apply_transformations(x_train, x_test, seed)
-
-    # train_ds = tf.data.Dataset.from_tensor_slices(
-    #     (x_train, y_train)).batch(train_batch_size)
-    #
-    # test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(test_batch_size)
+    x_train, x_test = apply_transformations(x_train, x_test, seed)
 
     x_train = x_train.astype('float32')
     x_test = x_test.astype('float32')
 
-    return (x_train, y_train), (x_test, y_test)
+    # y_train = np.eye(10)[y_train]
+    # y_test = np.eye(10)[y_test]
+    # y_train = y_train.reshape(y_train.shape[0],10)
+    # y_test = y_test.reshape(y_test.shape[0], 10)
+
+    # x_train = x_train[0:127, :, :, :]
+    # y_train = y_train[0:127,:]
+    #
+    # x_test = x_test[0:20, :, :, :]
+    # y_test = y_test[0:20,:]
+
+    print(x_train.shape)
+    print(y_train.shape)
+    print(x_test.shape)
+    print(y_test.shape)
+
+
+    train_ds = tf.data.Dataset.from_tensor_slices(
+        (x_train, y_train)).batch(train_batch_size)
+
+    test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(test_batch_size)
+
+    return train_ds, test_ds
+    # return (x_train, y_train), (x_test, y_test)
 
 
 

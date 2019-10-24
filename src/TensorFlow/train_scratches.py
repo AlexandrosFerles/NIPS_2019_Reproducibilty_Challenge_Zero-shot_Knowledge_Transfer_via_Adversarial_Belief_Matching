@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import random
 
@@ -16,7 +15,6 @@ def set_seed(seed=42):
     tf.random.set_seed(seed)
 
 
-@tf.function
 def train_step(images, labels, model, optimizer, train_loss, train_accuracy):
     with tf.GradientTape() as tape:
         predictions = model(images)[0]
@@ -24,11 +22,13 @@ def train_step(images, labels, model, optimizer, train_loss, train_accuracy):
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-    train_loss(loss)
-    train_accuracy(labels, predictions)
+    # loss_fn = lambda: loss_object(labels, model(images)[0])
+    # var_list_fn = lambda: model.trainable_weights
+    # optimizer.minimize(loss_fn, var_list_fn)
 
-    template = ' Loss: {}, Accuracy: {}'
-    print(template.format(train_loss.result(), train_accuracy.result() * 100))
+    train_loss(loss)
+    print('train loss ', train_loss.result())
+    train_accuracy(labels, predictions)
 
 
 @tf.function
@@ -41,7 +41,7 @@ def test_step(images, labels, model, test_loss, test_accuracy):
 
 
 def loss_object(labels, logits):
-    return tf.keras.losses.sparse_categorical_crossentropy(labels, logits)
+    return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=False)
 
 
 def learning_rate_schedule(current_lr, epoch):
@@ -56,6 +56,7 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
     epochs = 200
 
     optimizer = tf.keras.optimizers.SGD(learning_rate=0.1, momentum=0.9, nesterov=True)
+    # loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
 
     train_loss = tf.keras.metrics.Mean(name='train_loss')
     train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
@@ -81,6 +82,7 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
         new_lr = learning_rate_schedule(current_lr=optimizer.get_config()['learning_rate'], epoch=epoch)
         optimizer.learning_rate = new_lr
 
+        print('lr for epoch ', epoch, ' is : ', optimizer.get_config()['learning_rate'])
         for images, labels in train_ds:
             train_step(images, labels, model, optimizer, train_loss, train_accuracy)
 
@@ -94,7 +96,7 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
                               test_loss.result(),
                               test_accuracy.result() * 100))
 
-        ckpt.step.assign_add(1)
+        # ckpt.step.assign_add(1)
         epoch_accuracy = test_accuracy.result() * 100
         if log:
             with open(logfile, 'a') as temp:
@@ -102,9 +104,9 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
 
         if epoch_accuracy > best_test_set_accuracy:
             best_test_set_accuracy = epoch_accuracy
-            if checkpoint:
-                save_path = manager.save()
-                print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
+            # if checkpoint:
+            #     save_path = manager.save()
+            #     print("Saved checkpoint for step {}: {}".format(int(ckpt.step), save_path))
 
         # Reset the metrics for the next epoch
         train_loss.reset_states()
@@ -131,16 +133,15 @@ def _train_seed_amateur(model, loaders, log=False, checkpoint=False, logfile='',
     model.compile(optimizer=optimizer, loss=tf.keras.losses.sparse_categorical_crossentropy,
                   metrics=[tf.keras.metrics.sparse_categorical_accuracy])
 
-    image_gen = ImageDataGenerator(featurewise_center=False,
-                                   featurewise_std_normalization=False,
+    image_gen = ImageDataGenerator(featurewise_center=True,
+                                   featurewise_std_normalization=True,
                                    data_format='channels_last')
     image_gen.fit(x_train)
+    x_train = (x_train - image_gen.mean) / image_gen.std
+    x_test = (x_test - image_gen.mean) / image_gen.std
 
     history = model.fit(x_train, y_train, epochs=200, batch_size=128, validation_split=0.1,
-                        callbacks=callbacks)
-
-    # history = model.fit(x_train, y_train, epochs=200, batch_size=128, validation_split=0.1, callbacks=callbacks,
-    #                     verbose=1)
+                        callbacks=callbacks, verbose=1)
 
     loss, acc = model.evaluate(x_test, y_test)
 
@@ -202,7 +203,8 @@ def train(args):
 
         strides = [1, 1, 2, 2]
         model = WideResNet(d=wrn_depth, k=wrn_width, n_classes=10, output_features=16, strides=strides)
-
+        sample_input = tf.ones([1, 32, 32, 3])
+        out = model(sample_input)[0]
         checkpointFile = '_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, dataset,
                                                                  seed) if checkpoint else ''
         best_test_set_accuracy = _train_seed(model, loaders, log, checkpoint, logfile, checkpointFile)
