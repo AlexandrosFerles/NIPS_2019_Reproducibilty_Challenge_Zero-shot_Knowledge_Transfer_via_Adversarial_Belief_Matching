@@ -3,9 +3,8 @@ import random
 
 from keras_preprocessing.image import ImageDataGenerator
 
-from tf_utils import CustomLearningRateScheduler
+from tf_utils import MultiStepLearningRateScheduler
 from tf_utils import json_file_to_pyobj
-from WideResNetTF import WideResNet
 from WideResNetTF import WideResNet
 import tensorflow as tf
 
@@ -15,7 +14,7 @@ def set_seed(seed=42):
     np.random.seed(seed)
     tf.random.set_seed(seed)
 
-
+@tf.function
 def train_step(images, labels, model, optimizer, train_loss, train_accuracy):
     with tf.GradientTape() as tape:
         predictions = model(images)[0]
@@ -28,9 +27,8 @@ def train_step(images, labels, model, optimizer, train_loss, train_accuracy):
     # optimizer.minimize(loss_fn, var_list_fn)
 
     train_loss(loss)
-    print('train loss ', train_loss.result())
+    # print('train loss ', train_loss.result())
     train_accuracy(labels, predictions)
-
 
 @tf.function
 def test_step(images, labels, model, test_loss, test_accuracy):
@@ -45,19 +43,10 @@ def loss_object(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=False)
 
 
-def learning_rate_schedule(current_lr, epoch):
-    if epoch == 60 or epoch == 120 or epoch == 160:
-        return current_lr / 5
-    else:
-        return current_lr
-
-
 def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpointFile=''):
     train_ds, test_ds = loaders
     epochs = 200
-
-    optimizer = tf.keras.optimizers.SGD(learning_rate=0.1, momentum=0.9, nesterov=True)
-    # loss_object = tf.keras.losses.SparseCategoricalCrossentropy()
+    optimizer = tf.keras.optimizers.SGD(learning_rate=MultiStepLearningRateScheduler(0.1), momentum=0.9, nesterov=True)
 
     train_loss = tf.keras.metrics.Mean(name='train_loss')
     train_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='train_accuracy')
@@ -79,11 +68,9 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
 
     for epoch in range(epochs):
 
-        # update learning rate with scheduler
-        new_lr = learning_rate_schedule(current_lr=optimizer.get_config()['learning_rate'], epoch=epoch)
-        optimizer.learning_rate = new_lr
+        # print('lr for epoch : ' , epoch , 'is ', optimizer.learning_rate.learning_rate)
+        # print('lr for epoch : ' , epoch , 'is ', optimizer.get_config()['learning_rate'])
 
-        print('lr for epoch ', epoch, ' is : ', optimizer.learning_rate)
         for images, labels in train_ds:
             train_step(images, labels, model, optimizer, train_loss, train_accuracy)
 
@@ -232,7 +219,7 @@ def train(args):
 if __name__ == '__main__':
     import argparse
 
-    #tf.config.experimental_run_functions_eagerly(True)
+    # tf.config.experimental_run_functions_eagerly(True)
 
     print("TensorFlow version: {}".format(tf.__version__))
     print("Eager execution: {}".format(tf.executing_eagerly()))
