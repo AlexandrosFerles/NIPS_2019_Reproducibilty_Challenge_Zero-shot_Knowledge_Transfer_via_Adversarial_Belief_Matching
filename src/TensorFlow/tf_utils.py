@@ -60,7 +60,7 @@ def apply_transformations(x_train, x_test, seed=42):
         im = flip_upside_down1(im, seed)
         # im = flip_left_right(image, seed)
 
-        x_train[index, :, :, :] = image
+        x_train[index, :, :, :] = im
 
     x_train = x_train / 255
     x_test = x_test / 255
