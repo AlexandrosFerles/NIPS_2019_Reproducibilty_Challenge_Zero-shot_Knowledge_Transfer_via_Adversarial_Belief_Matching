@@ -103,7 +103,7 @@ def cifar10loaders(train_batch_size=128, test_batch_size=10, seed=42):
     # train_ds = train_ds.map(lambda x, y: (flip_upside_down(x), y))
     # clip values inside [0,1] if outside
     # train_ds = train_ds.map(lambda x, y: (tf.clip_by_value(x, 0, 1), y))
-    train_ds = train_ds.batch(train_batch_size)
+    # train_ds = train_ds.batch(train_batch_size)
 
     test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(test_batch_size)
     # test_ds = test_ds.map(lambda x, y: (tf.div(tf.cast(x, tf.float32), 255.0), y))
