@@ -83,7 +83,7 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
         new_lr = learning_rate_schedule(current_lr=optimizer.get_config()['learning_rate'], epoch=epoch)
         optimizer.learning_rate = new_lr
 
-        print('lr for epoch ', epoch, ' is : ', optimizer.get_config()['learning_rate'])
+        print('lr for epoch ', epoch, ' is : ', optimizer.learning_rate)
         for images, labels in train_ds:
             train_step(images, labels, model, optimizer, train_loss, train_accuracy)
 
@@ -97,7 +97,7 @@ def _train_seed(model, loaders, log=False, checkpoint=False, logfile='', checkpo
                               test_loss.result(),
                               test_accuracy.result() * 100))
 
-        # ckpt.step.assign_add(1)
+        ckpt.step.assign_add(1)
         epoch_accuracy = test_accuracy.result() * 100
         if log:
             with open(logfile, 'a') as temp:
@@ -204,8 +204,7 @@ def train(args):
 
         strides = [1, 1, 2, 2]
         model = WideResNet(d=wrn_depth, k=wrn_width, n_classes=10, output_features=16, strides=strides)
-        sample_input = tf.ones([1, 32, 32, 3])
-        out = model(sample_input)[0]
+
         checkpointFile = '_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, dataset,
                                                                  seed) if checkpoint else ''
         best_test_set_accuracy = _train_seed(model, loaders, log, checkpoint, logfile, checkpointFile)
