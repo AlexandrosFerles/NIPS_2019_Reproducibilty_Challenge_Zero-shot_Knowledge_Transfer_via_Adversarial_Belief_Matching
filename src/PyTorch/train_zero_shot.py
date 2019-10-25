@@ -82,6 +82,7 @@ def train(args):
     wrn_depth_student = kd_att_configurations.wrn_depth_student
     wrn_width_student = kd_att_configurations.wrn_width_student
 
+    # TODO: How to use that in few shot?
     M = kd_att_configurations.M
 
     dataset = kd_att_configurations.dataset
@@ -132,8 +133,8 @@ def train(args):
                 loaders = svhnLoaders()
             # No data
             elif M == 0:
-                from utils import svhnloaders
-                _, test_loader = svhnloaders
+                from utils import svhnLoaders
+                _, test_loader = svhnLoaders()
             else:
                 from utils import svhnloadersM
                 loaders = svhnloadersM(M)
