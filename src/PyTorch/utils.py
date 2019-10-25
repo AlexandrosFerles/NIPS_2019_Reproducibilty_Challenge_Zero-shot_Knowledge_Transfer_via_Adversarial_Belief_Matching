@@ -135,7 +135,7 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10):
     return trainloader, testloader
 
 
-def adjust_learning_rate_scratch(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
+def adjust_learning_rate(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
 
     if epoch == epoch_thresholds[0]:
         for param_group in optimizer.param_groups:
@@ -162,7 +162,7 @@ def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, cr
     loss_term2 = criterion2(F.log_softmax(student_out/T), F.softmax(teacher_out/T))
     loss_term2 *= (T**2)*2*a
     attention_losses = [attention_loss(att1, att2) for (att1, att2) in activation_pairs]
-    loss_term3 = (b/2) * sum(attention_losses)
+    loss_term3 = b * sum(attention_losses)
 
     return loss_term1 + loss_term2 + loss_term3
 
@@ -175,4 +175,24 @@ def attention_loss(att1, att2):
 
     # Loss now is just the p2-norm of the normalized attention maps!
     loss = torch.sqrt(torch.sum((att1_norm - att2_norm).pow(2)))
+    return loss
+
+
+def generator_loss(student_outputs, teacher_outputs, criterion=nn.KLDivLoss(), T=1):
+
+    gen_loss = -criterion(F.log_softmax(student_outputs / T), F.softmax(teacher_outputs / T))
+    return gen_loss
+
+
+def student_loss_zero_shot(student_outputs, teacher_outputs, b):
+
+    student_out, student_activations = student_outputs[0], student_outputs[1:]
+    teacher_out, teacher_activations = teacher_outputs[0], teacher_outputs[1:]
+
+    activation_pairs = zip(student_activations, teacher_activations)
+
+    attention_losses = [attention_loss(att1, att2, T=1) for (att1, att2) in activation_pairs]
+    loss_term1 = b * sum(attention_losses)
+    loss = loss_term1 - generator_loss(student_out, teacher_out)
+
     return loss

@@ -6,7 +6,7 @@ import numpy as np
 import random
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
-from utils import adjust_learning_rate_scratch
+from utils import adjust_learning_rate
 
 
 def set_seed(seed=42):
@@ -42,7 +42,7 @@ def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', c
             loss.backward()
             optimizer.step()
 
-        optimizer = adjust_learning_rate_scratch(optimizer, epoch + 1)
+        optimizer = adjust_learning_rate(optimizer, epoch + 1)
 
         with torch.no_grad():
 
