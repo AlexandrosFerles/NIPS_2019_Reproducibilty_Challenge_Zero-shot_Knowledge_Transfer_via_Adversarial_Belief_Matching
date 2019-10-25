@@ -6,6 +6,7 @@ from keras_preprocessing.image import ImageDataGenerator
 from tf_utils import CustomLearningRateScheduler
 from tf_utils import json_file_to_pyobj
 from WideResNetTF import WideResNet
+from WideResNetTF import WideResNet
 import tensorflow as tf
 
 
@@ -18,7 +19,7 @@ def set_seed(seed=42):
 def train_step(images, labels, model, optimizer, train_loss, train_accuracy):
     with tf.GradientTape() as tape:
         predictions = model(images)[0]
-        loss = loss_object(labels, predictions)
+        loss = tf.reduce_mean(loss_object(labels, predictions))
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
@@ -33,7 +34,7 @@ def train_step(images, labels, model, optimizer, train_loss, train_accuracy):
 
 @tf.function
 def test_step(images, labels, model, test_loss, test_accuracy):
-    predictions = model(images)[0]
+    predictions = model(images, training=False)[0]
     t_loss = loss_object(labels, predictions)
 
     test_loss(t_loss)
@@ -231,6 +232,8 @@ def train(args):
 
 if __name__ == '__main__':
     import argparse
+
+    #tf.config.experimental_run_functions_eagerly(True)
 
     print("TensorFlow version: {}".format(tf.__version__))
     print("Eager execution: {}".format(tf.executing_eagerly()))

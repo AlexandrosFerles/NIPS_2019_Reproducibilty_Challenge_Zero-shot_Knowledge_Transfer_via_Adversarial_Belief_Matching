@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras.regularizers import l2
+from tensorflow.keras.regularizers import l2
 from tensorflow.keras import layers
 import random
 import numpy as np
@@ -7,7 +7,7 @@ import math
 
 
 WEIGHT_DECAY = 5e-4
-KERNEL_INIT = 'glorot_normal'
+KERNEL_INIT = 'he_normal'
 
 # Clear notebook
 tf.keras.backend.clear_session()
@@ -22,8 +22,10 @@ class WideResBlock1(layers.Layer):
         super(WideResBlock1, self).__init__()
         self.activation = layers.ReLU()
 
-        self.batch_norm1 = layers.BatchNormalization()
-        self.batch_norm2 = layers.BatchNormalization()
+        self.batch_norm1 = layers.BatchNormalization(epsilon=1e-05, momentum=0.1, beta_regularizer=l2(WEIGHT_DECAY),
+                                                     gamma_regularizer=l2(WEIGHT_DECAY))
+        self.batch_norm2 = layers.BatchNormalization(epsilon=1e-05, momentum=0.1, beta_regularizer=l2(WEIGHT_DECAY),
+                                                     gamma_regularizer=l2(WEIGHT_DECAY))
 
         self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False,
                                    kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
@@ -41,16 +43,16 @@ class WideResBlock1(layers.Layer):
                                           kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
 
     @tf.function
-    def call(self, x):
+    def call(self, x, training=True):
         if self.subsample_input or self.increase_filters:
-            x = self.batch_norm1(x)
+            x = self.batch_norm1(x, training=training)
             x = self.activation(x)
             x1 = self.conv1(x)
         else:
-            x1 = self.batch_norm1(x)
+            x1 = self.batch_norm1(x, training=training)
             x1 = self.activation(x1)
             x1 = self.conv1(x1)
-        x1 = self.batch_norm2(x1)
+        x1 = self.batch_norm2(x1, training=training)
         x1 = self.activation(x1)
         x1 = self.conv2(x1)
 
@@ -66,8 +68,10 @@ class WideResBlock(layers.Layer):
         super(WideResBlock, self).__init__()
         self.activation = layers.ReLU()
 
-        self.batch_norm1 = layers.BatchNormalization()
-        self.batch_norm2 = layers.BatchNormalization()
+        self.batch_norm1 = layers.BatchNormalization(epsilon=1e-05, momentum=0.1, beta_regularizer=l2(WEIGHT_DECAY),
+                                                     gamma_regularizer=l2(WEIGHT_DECAY))
+        self.batch_norm2 = layers.BatchNormalization(epsilon=1e-05, momentum=0.1, beta_regularizer=l2(WEIGHT_DECAY),
+                                                     gamma_regularizer=l2(WEIGHT_DECAY))
 
         self.conv1 = layers.Conv2D(output_features, kernel_size=3, strides=stride, padding='same', use_bias=False,
                                    kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
@@ -75,11 +79,11 @@ class WideResBlock(layers.Layer):
                                    kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
 
     @tf.function
-    def call(self, x):
-        x1 = self.batch_norm1(x)
+    def call(self, x, training=True):
+        x1 = self.batch_norm1(x, training=training)
         x1 = self.activation(x1)
         x1 = self.conv1(x1)
-        x1 = self.batch_norm2(x1)
+        x1 = self.batch_norm2(x1, training=training)
         x1 = self.activation(x1)
         x1 = self.conv2(x1)
 
@@ -101,8 +105,8 @@ class Nblocks(tf.keras.Model):
         self.NblockLayers = tf.keras.Sequential(layers)
 
     @tf.function
-    def call(self, x):
-        return self.NblockLayers(x)
+    def call(self, x, training=True):
+        return self.NblockLayers(x, training=training)
 
 
 class WideResNet(tf.keras.Model):
@@ -124,18 +128,19 @@ class WideResNet(tf.keras.Model):
         self.block3 = Nblocks(N, input_features=filters[1], output_features=filters[2], stride=strides[3],
                               subsample_input=True, increase_filters=True)
 
-        self.batch_norm = layers.BatchNormalization()
+        self.batch_norm = layers.BatchNormalization(epsilon=1e-05, momentum=0.1, beta_regularizer=l2(WEIGHT_DECAY),
+                                                     gamma_regularizer=l2(WEIGHT_DECAY))
         self.activation = layers.ReLU()
         self.avg_pool = layers.AveragePooling2D(pool_size=8)
-        self.fc = layers.Dense(n_classes, kernel_initializer=KERNEL_INIT, kernel_regularizer=l2(WEIGHT_DECAY))
+        self.fc = layers.Dense(n_classes, bias_initializer='zeros', kernel_regularizer=l2(WEIGHT_DECAY), activation='softmax')
 
     @tf.function
-    def call(self, x):
+    def call(self, x, training=True):
         x = self.conv1(x)
-        attention1 = self.block1(x)
-        attention2 = self.block2(attention1)
-        attention3 = self.block3(attention2)
-        out = self.batch_norm(attention3)
+        attention1 = self.block1(x, training=training)
+        attention2 = self.block2(attention1, training=training)
+        attention3 = self.block3(attention2, training=training)
+        out = self.batch_norm(attention3, training=training)
         out = self.activation(out)
         out = self.avg_pool(out)
         out = tf.reshape(out, (-1, self.out_filters))

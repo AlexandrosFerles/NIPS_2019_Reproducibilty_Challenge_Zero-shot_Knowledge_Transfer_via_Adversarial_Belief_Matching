@@ -34,26 +34,27 @@ def flip_upside_down(image, seed=42):
 
 def apply_transformations(x_train, x_test, seed=42):
     # train transformation
-    x_train[:, :, :, 0] = (x_train[:, :, :, 0] - 0.4377) / 0.1980
-    x_train[:, :, :, 1] = (x_train[:, :, :, 1] - 0.4438) / 0.2010
-    x_train[:, :, :, 2] = (x_train[:, :, :, 2] - 0.4728) / 0.1970
-
-    # test transformation
-    x_test[:, :, :, 0] = (x_test[:, :, :, 0] - 0.4377) / 0.1980
-    x_test[:, :, :, 1] = (x_test[:, :, :, 1] - 0.4438) / 0.2010
-    x_test[:, :, :, 2] = (x_test[:, :, :, 2] - 0.4728) / 0.1970
-
     # for index, image in enumerate(x_train):
     #
     #     if index % 5000 == 0:
     #         print('preprocessed ', index)
     #
-    #     im = pad(image)
-    #     im = crop(im, (32, 32, 3))
-    #     im = flip_upside_down(im, seed)
+    #     #im = pad(image)
+    #     #im = crop(im, (32, 32, 3))
+    #     #im = flip_upside_down(im, seed)
+    #     image = flip_upside_down(image, seed)
     #     # im = flip_left_right(image, seed)
     #
-    #     x_train[index, :, :, :] = im
+    #     x_train[index, :, :, :] = image
+
+    x_train[:, :, :, 0] = (x_train[:, :, :, 0] - 0.4914) / 0.2023
+    x_train[:, :, :, 1] = (x_train[:, :, :, 1] - 0.4822) / 0.1994
+    x_train[:, :, :, 2] = (x_train[:, :, :, 2] - 0.4465) / 0.2010
+
+    # test transformation
+    x_test[:, :, :, 0] = (x_test[:, :, :, 0] - 0.4914) / 0.2023
+    x_test[:, :, :, 1] = (x_test[:, :, :, 1] - 0.4822) / 0.1994
+    x_test[:, :, :, 2] = (x_test[:, :, :, 2] - 0.4465) / 0.2010
 
     x_train = x_train.astype('float32')
     x_test = x_test.astype('float32')
@@ -64,6 +65,9 @@ def apply_transformations(x_train, x_test, seed=42):
 def cifar10loaders(train_batch_size=128, test_batch_size=10, seed=42):
     # Tuple of Numpy arrays
     (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+
+    x_train = x_train / 255
+    x_test = x_test / 255
 
     x_train, x_test = apply_transformations(x_train, x_test, seed)
 
