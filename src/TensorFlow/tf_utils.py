@@ -51,18 +51,17 @@ def flip_upside_down1(image, seed=42):
 def apply_transformations(x_train, x_test, seed=42):
     # train transformation
 
-    # for index, image in enumerate(x_train):
-    #
-    #     if index % 5000 == 0:
-    #         print('preprocessed ', index)
-    #
-    #     #im = pad(image)
-    #     #im = crop(im, (32, 32, 3))
-    #     #im = flip_upside_down(im, seed)
-    #     image = flip_upside_down(image, seed)
-    #     # im = flip_left_right(image, seed)
-    #
-    #     x_train[index, :, :, :] = image
+    for index, image in enumerate(x_train):
+
+        if index % 5000 == 0:
+            print('preprocessed ', index)
+
+        im = pad1(image)
+        im = crop1(im, (32, 32, 3))
+        im = flip_upside_down1(im, seed)
+        # im = flip_left_right(image, seed)
+
+        x_train[index, :, :, :] = image
 
     x_train = x_train / 255
     x_test = x_test / 255
@@ -86,9 +85,6 @@ def cifar10loaders(train_batch_size=128, test_batch_size=10, seed=42):
     # Tuple of Numpy arrays
     (x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
 
-    x_train = x_train / 255
-    x_test = x_test / 255
-
     x_train, x_test = apply_transformations(x_train, x_test, seed)
 
     print(x_train.shape)
@@ -103,7 +99,7 @@ def cifar10loaders(train_batch_size=128, test_batch_size=10, seed=42):
     # train_ds = train_ds.map(lambda x, y: (flip_upside_down(x), y))
     # clip values inside [0,1] if outside
     # train_ds = train_ds.map(lambda x, y: (tf.clip_by_value(x, 0, 1), y))
-    # train_ds = train_ds.batch(train_batch_size)
+    #     train_ds = train_ds.batch(train_batch_size)
 
     test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(test_batch_size)
     # test_ds = test_ds.map(lambda x, y: (tf.div(tf.cast(x, tf.float32), 255.0), y))
