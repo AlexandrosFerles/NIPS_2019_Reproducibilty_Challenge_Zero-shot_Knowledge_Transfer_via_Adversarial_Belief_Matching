@@ -3,7 +3,7 @@ from torch import optim
 import numpy as np
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
-from utils import adjust_learning_rate_scratch, kd_att_loss
+from utils import adjust_learning_rate, kd_att_loss
 
 from train_scratches import set_seed
 
@@ -36,7 +36,7 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
             loss.backward()
             optimizer.step()
 
-        optimizer = adjust_learning_rate_scratch(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
+        optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
 
         with torch.no_grad():
 
@@ -171,8 +171,6 @@ def train(args):
                 with open(logfile, 'a') as temp:
                     temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
-            mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
-
         else:
 
             with torch.no_grad():
@@ -196,6 +194,8 @@ def train(args):
                 best_test_set_accuracy = round(100 * best_test_set_accuracy, 2)
 
                 test_set_accuracies.append(best_test_set_accuracy)
+
+    mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
 
     if log:
         with open(logfile, 'a') as temp:

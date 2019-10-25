@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+.idea
+=======
 .idea
 *__pycache__
 src/PyTorch/data/
 *.ipynb_checkpoints/
+>>>>>>> 2766ab1166f2ac72cd23a07c1b66f20e27d27855
