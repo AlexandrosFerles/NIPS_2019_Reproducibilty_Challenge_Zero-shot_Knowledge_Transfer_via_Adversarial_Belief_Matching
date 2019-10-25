@@ -6,22 +6,37 @@ import numpy as np
 import random
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
+from Generator import Generator
 from utils import adjust_learning_rate, kd_att_loss
 from train_scratches import set_seed
 
 
-def _train_seed_zero_shot(teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
+def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
 
     train_loader, test_loader = loaders
+    # TODO: Find a way to include M too to calculate the number of epochs in generator
+    # TODO: Maybe they partcipate as samples in the number of pseudo batches
     epochs = 200 * (50000 / M)
-    epoch_thresholds = [int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
-    optimizer = optim.Adam(student_net.parameters(), lr=2e-3)
+
+    # Hardcoded values from paper!
+    ng = 1
+    ns = 10
+    total_batches = 128 # I think!
+
+    student_optimizer = optim.Adam(student_net.parameters(), lr=2e-3)
+    cosine_annealing_student = optim.lr_scheduler.CosineAnnealingLr(student_optimizer, total_batches)
+    generator_optimizer = optim.Adam(generator_net.parameters(), lr=2e-3)
+    cosine_annealing_generator = optim.lr_scheduler.CosineAnnealingLr(generator_optimizer, total_batches)
 
     best_test_set_accuracy = 0
     teacher_net.eval()
 
-    for epoch in range(epochs):
+    for batch in range(total_batches):
+
+        generator_net.train()
+        z =
+        sample = generator_net()
 
         student_net.train()
         for i, data in enumerate(train_loader, 0):
@@ -69,6 +84,7 @@ def _train_seed_zero_shot(teacher_net, student_net, M, loaders, device, log=Fals
                 if checkpoint:
                     torch.save(student_net.state_dict(), checkpointFile)
 
+    # TODO: Return generated samples too
     return best_test_set_accuracy
 
 
@@ -159,9 +175,13 @@ def train(args):
         student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3, output_features=16, strides=strides)
         student_net = student_net.to(device)
 
+        generator_net = Generator()
+        generator_net = generator_net.to(device)
+
+        # TODO: Maybe I should use M in checkpoint file name too
         checkpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, dataset, seed) if checkpoint else ''
 
-        best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
+        best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
 
         if log:
             with open(logfile, 'a') as temp:
