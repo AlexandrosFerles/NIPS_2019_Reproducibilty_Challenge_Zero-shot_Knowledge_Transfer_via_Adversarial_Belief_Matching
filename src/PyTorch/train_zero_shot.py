@@ -6,4 +6,233 @@ import numpy as np
 import random
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
-from utils import adjust_learning_rate
+from Generator import Generator
+from utils import adjust_learning_rate, kd_att_loss, generator_loss, student_loss_zero_shot
+from train_scratches import set_seed
+
+
+def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
+
+    # TODO: Find a way to include M too to calculate the number of epochs in generator
+    # TODO: Maybe they participate as samples in the number of pseudo batches
+    epochs = 200 * (50000 / M)
+
+    # Hardcoded values from paper and script training files of official GitHub repo!
+    ng = 1
+    ns = 10
+    total_batches = 8e4
+
+    student_optimizer = optim.Adam(student_net.parameters(), lr=2e-3)
+    cosine_annealing_student = optim.lr_scheduler.CosineAnnealingLr(student_optimizer, total_batches)
+    generator_optimizer = optim.Adam(generator_net.parameters(), lr=1e-3)
+    cosine_annealing_generator = optim.lr_scheduler.CosineAnnealingLr(generator_optimizer, total_batches)
+
+    best_test_set_accuracy = 0
+    samples = []
+    teacher_net.eval()
+
+    for batch in range(total_batches):
+
+        generator_net.train()
+        sample = generator_net()
+        samples.append(sample)
+
+        for _ in range(ng):
+
+            generator_optimizer.zero_grad()
+
+            student_out = student_net(sample)[0]
+            teacher_out = teacher_net(sample)[0]
+
+            gen_loss = generator_loss(student_out, teacher_out)
+            gen_loss.backward()
+            # Added from official repo!
+            torch.nn.utils.clip_grad_norm_(generator_optimizer.parameters(), 5)
+            generator_optimizer.step()
+
+        # TODO: Add in the report (gdoc first) that we originally thought that the samples
+        # TODO: Should be resampled before generator training
+        student_net.train()
+        for _ in range(ns):
+
+            student_optimizer.zero_grad()
+
+            student_outputs = student_net(sample)
+            teacher_outputs = teacher_net(sample)
+
+            loss = student_loss_zero_shot(student_outputs, teacher_outputs)
+            loss.backward()
+            # Likewise!
+            torch.nn.utils.clip_grad_norm_(student_net.parameters(), 5)
+            student_optimizer.step()
+
+        # TODO: Suppose that M is > 0, how and when should the extra samples participate?
+        # TODO: Let's assume that the training comes after the student update on generator's samples!
+
+        # TODO: Make sure that only test loader is added with M = 0 in train seed function
+        if M > 0:
+            train_loader, test_loader = loaders
+
+            # Train student on samples!
+            for i, data in enumerate(train_loader, 0):
+                inputs, labels = data
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+
+                student_optimizer.zero_grad()
+
+                student_outputs = student_net(inputs)
+                teacher_outputs = teacher_net(inputs)
+
+                loss = kd_att_loss(student_outputs, teacher_outputs, labels)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(student_net.parameters(), 5)
+                student_optimizer.step()
+        else:
+            test_loader = loaders
+
+        with torch.no_grad():
+
+            correct = 0
+            total = 0
+
+            student_net.eval()
+            for data in test_loader:
+                images, labels = data
+                images = images.to(device)
+                labels = labels.to(device)
+
+                student_net(images)
+                outputs = student_net(images)[0]
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+            batch_accuracy = correct / total
+            batch_accuracy = round(100 * batch_accuracy, 2)
+
+            if log:
+                with open(logfile, 'a') as temp:
+                    temp.write('Accuracy at batch {} is {}%\n'.format(batch + 1, batch_accuracy))
+
+            if batch_accuracy > best_test_set_accuracy:
+                best_test_set_accuracy = batch_accuracy
+                if checkpoint:
+                    torch.save(student_net.state_dict(), checkpointFile)
+
+        cosine_annealing_generator.step()
+        cosine_annealing_student.step()
+
+    return best_test_set_accuracy, samples
+
+
+def train(args):
+
+    json_options = json_file_to_pyobj(args.config)
+    kd_att_configurations = json_options.kd_att
+
+    wrn_depth_teacher = kd_att_configurations.wrn_depth_teacher
+    wrn_width_teacher = kd_att_configurations.wrn_width_teacher
+    wrn_depth_student = kd_att_configurations.wrn_depth_student
+    wrn_width_student = kd_att_configurations.wrn_width_student
+
+    # TODO: How to use that in few shot?
+    M = kd_att_configurations.M
+
+    dataset = kd_att_configurations.dataset
+    seeds = [int(seed) for seed in kd_att_configurations.seeds]
+    log = bool(kd_att_configurations.checkpoint)
+
+    if log:
+        teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
+        student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
+        logfile = 'Teacher-{}-Student-{}-{}-M={}-Zero-Shot'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
+        with open(logfile, 'w') as temp:
+            temp.write('Zero-Shot with teacher {} and student {} in {} with M=\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
+    else:
+        logfile = ''
+
+    checkpoint = bool(kd_att_configurations.checkpoint)
+
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    test_set_accuracies = []
+
+    for seed in seeds:
+
+        set_seed(seed)
+
+        if dataset == 'cifar10':
+
+            # Full data
+            if M == 5000:
+                from utils import cifar10loaders
+                loaders = cifar10loaders()
+            # No data
+            elif M == 0:
+                from utils import cifar10loaders
+                _, test_loader = cifar10loaders
+            else:
+                from utils import cifar10loadersM
+                loaders = cifar10loadersM(M)
+
+        elif dataset == 'svhn':
+
+            # Full data
+            if M == 5000:
+                from utils import svhnLoaders
+                loaders = svhnLoaders()
+            # No data
+            elif M == 0:
+                from utils import svhnLoaders
+                _, test_loader = svhnLoaders()
+            else:
+                from utils import svhnloadersM
+                loaders = svhnloadersM(M)
+
+        else:
+            ValueError('Datasets to choose from: CIFAR10 and SVHN')
+
+        if log:
+            with open(logfile, 'a') as temp:
+                temp.write('------------------- SEED {} -------------------\n'.format(seed))
+
+        strides = [1, 1, 2, 2]
+
+        teacher_net = WideResNet(d=wrn_depth_teacher, k=wrn_width_teacher, n_classes=10, input_features=3, output_features=16, strides=strides)
+        teacher_net = teacher_net.to(device)
+        if dataset == 'cifar10':
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
+        else:
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
+        teacher_net.load_state_dict(torch_checkpoint)
+
+        student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3, output_features=16, strides=strides)
+        student_net = student_net.to(device)
+
+        generator_net = Generator()
+        generator_net = generator_net.to(device)
+
+        # TODO: Maybe I should use M in checkpoint file name too
+        checkpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M={}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
+
+        best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
+
+        if log:
+            with open(logfile, 'a') as temp:
+                temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
+
+        test_set_accuracies.append(best_test_set_accuracy)
+
+        if log:
+            with open(logfile, 'a') as temp:
+                temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
+
+    mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
+
+    if log:
+        with open(logfile, 'a') as temp:
+            temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
