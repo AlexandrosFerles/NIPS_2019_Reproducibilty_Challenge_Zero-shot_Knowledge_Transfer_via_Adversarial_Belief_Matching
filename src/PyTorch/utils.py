@@ -152,8 +152,8 @@ def adjust_learning_rate(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
 
 def attention_loss(att1, att2):
     # derive l2 norm of each attention map
-    att1_norm = F.normalize(att1.pow(2).mean(1).view(x.size(0), -1))
-    att2_norm = F.normalize(att2.pow(2).mean(1).view(x.size(0), -1))
+    att1_norm = F.normalize(att1.pow(2).mean(1).view(att1.size(0), -1))
+    att2_norm = F.normalize(att2.pow(2).mean(1).view(att2.size(0), -1))
 
     # Loss now is just the p2-norm of the normalized attention maps!
     loss = (att1_norm - att2_norm).pow(2).mean()
