@@ -5,7 +5,7 @@ from utils import json_file_to_pyobj
 from WideResNet import WideResNet
 from utils import adjust_learning_rate, kd_att_loss
 from train_scratches import set_seed
-
+import os
 
 def _test_set_eval(net, device, test_loader):
 
@@ -185,3 +185,18 @@ def train(args):
     if log:
         with open(logfile, 'a') as temp:
             temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
+
+
+if __name__ == '__main__':
+    import argparse
+
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
+
+    parser = argparse.ArgumentParser(description='WideResNet Scratches')
+
+    parser.add_argument('-config', '--config', help='Training Configurations', required=True)
+
+    args = parser.parse_args()
+
+    train(args)
