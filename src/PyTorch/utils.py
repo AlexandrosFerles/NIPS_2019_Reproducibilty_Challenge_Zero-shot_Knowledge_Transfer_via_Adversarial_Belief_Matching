@@ -3,15 +3,12 @@ import json
 import torch
 import torchvision
 from torch import nn as nn
-from torch.nn import functional as F
 from torchvision import transforms
 import torch.nn.functional as F
 from torch.utils.data.sampler import SubsetRandomSampler
 
 
 # Borrowed from https://github.com/ozan-oktay/Attention-Gated-Networks
-
-
 def json_file_to_pyobj(filename):
     def _json_object_hook(d): return collections.namedtuple('X', d.keys())(*d.values())
     def json2obj(data): return json.loads(data, object_hook=_json_object_hook)
@@ -152,8 +149,8 @@ def adjust_learning_rate(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
 
 def attention_loss(att1, att2):
     # derive l2 norm of each attention map
-    att1_norm = F.normalize(att1.pow(2).mean(1).view(x.size(0), -1))
-    att2_norm = F.normalize(att2.pow(2).mean(1).view(x.size(0), -1))
+    att1_norm = F.normalize(att1.pow(2).mean(1).view(att1.size(0), -1))
+    att2_norm = F.normalize(att2.pow(2).mean(1).view(att2.size(0), -1))
 
     # Loss now is just the p2-norm of the normalized attention maps!
     loss = (att1_norm - att2_norm).pow(2).mean()
@@ -180,9 +177,11 @@ def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, cr
 def generator_loss(student_outputs, teacher_outputs, criterion=nn.KLDivLoss(), T=1):
 
     gen_loss = -criterion(F.log_softmax(student_outputs / T), F.softmax(teacher_outputs / T))
+
     return gen_loss
 
 
+# TODO: Needs debugging
 def student_loss_zero_shot(student_outputs, teacher_outputs, b=250):
 
     student_out, student_activations = student_outputs[0], student_outputs[1:]
