@@ -35,10 +35,6 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 
     train_loader, test_loader = loaders
     epochs = int(200 * (50000 / M))
-<<<<<<< HEAD
-    print(f'{epochs}')
-=======
->>>>>>> 97b4fdc4a00f1565cd8a3e34ffdfb0da3b31cc1d
     epoch_thresholds = [int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
     optimizer = optim.SGD(student_net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
