@@ -97,7 +97,7 @@ def train(args):
         student_str = "WideResNet-{}-{}".format(wrn_depth_student, wrn_width_student)
         logfile = "Teacher-{}-Student-{}-{}-M={}.txt".format(teacher_str, student_str, kd_att_configurations.dataset, M)
         print(logfile)
-        with open(logfile, "w") as temp:
+        with open(logfile[1:-1], "w") as temp:
             temp.write('KD_ATT with teacher {} and student {} in {} with M={}\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
     else:
         logfile = ''
