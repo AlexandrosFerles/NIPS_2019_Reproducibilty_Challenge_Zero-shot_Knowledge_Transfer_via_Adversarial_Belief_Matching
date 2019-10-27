@@ -150,6 +150,16 @@ def adjust_learning_rate(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
     return optimizer
 
 
+def attention_loss(att1, att2):
+    # derive l2 norm of each attention map
+    att1_norm = F.normalize(att1.pow(2).mean(1).view(x.size(0), -1))
+    att2_norm = F.normalize(att2.pow(2).mean(1).view(x.size(0), -1))
+
+    # Loss now is just the p2-norm of the normalized attention maps!
+    loss = (att1_norm - att2_norm).pow(2).mean()
+    return loss
+
+
 def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, criterion1=nn.CrossEntropyLoss(), criterion2=nn.KLDivLoss()):
 
     student_out, student_activations = student_outputs[0], student_outputs[1:]
@@ -165,17 +175,6 @@ def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, cr
     loss_term3 = b * sum(attention_losses)
 
     return loss_term1 + loss_term2 + loss_term3
-
-
-def attention_loss(att1, att2):
-
-    # derive l2 norm of each attention map
-    att1_norm = F.normalize(att1)
-    att2_norm = F.normalize(att2)
-
-    # Loss now is just the p2-norm of the normalized attention maps!
-    loss = torch.sqrt(torch.sum((att1_norm - att2_norm).pow(2)))
-    return loss
 
 
 def generator_loss(student_outputs, teacher_outputs, criterion=nn.KLDivLoss(), T=1):
