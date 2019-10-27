@@ -84,14 +84,14 @@ def cifar10loadersM(M, train_batch_size=128, test_batch_size=10):
     transform_train, transform_test = dataset_transforms('cifar10')
 
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
-    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, num_workers=0)
+    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, num_workers=4)
 
     # sample M data per_class
     data_collected = [0]*10
     total_collected = 0
     success = 10*M
     indices = []
-    for index, (_, label) in temp_trainloader:
+    for index, (_, label) in enumerate(temp_trainloader):
         if data_collected[label] < M:
             data_collected[label] += 1
             indices.append(index)
@@ -152,8 +152,8 @@ def adjust_learning_rate(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
 
 def attention_loss(att1, att2):
     # derive l2 norm of each attention map
-    att1_norm = F.normalize(att1.pow(2).mean(1).view(x.size(0), -1))
-    att2_norm = F.normalize(att2.pow(2).mean(1).view(x.size(0), -1))
+    att1_norm = F.normalize(att1.pow(2).mean(1).view(att1.size(0), -1))
+    att2_norm = F.normalize(att2.pow(2).mean(1).view(att2.size(0), -1))
 
     # Loss now is just the p2-norm of the normalized attention maps!
     loss = (att1_norm - att2_norm).pow(2).mean()
@@ -169,7 +169,7 @@ def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, cr
 
     loss_term1 = (1-a) * criterion1(student_out, labels)
     # changed to log softmax for student_out and 2a for loss_term2 after inspection of the official code
-    loss_term2 = criterion2(F.log_softmax(student_out/T), F.softmax(teacher_out/T))
+    loss_term2 = criterion2(F.log_softmax(student_out/T, dim=1), F.softmax(teacher_out/T, dim=1))
     loss_term2 *= (T**2)*2*a
     attention_losses = [attention_loss(att1, att2) for (att1, att2) in activation_pairs]
     loss_term3 = b * sum(attention_losses)
