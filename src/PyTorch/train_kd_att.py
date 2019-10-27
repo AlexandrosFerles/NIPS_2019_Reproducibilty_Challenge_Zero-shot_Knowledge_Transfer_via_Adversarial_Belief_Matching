@@ -92,10 +92,10 @@ def train(args):
     log = bool(kd_att_configurations.checkpoint)
 
     if log:
-        teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
-        student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
+        teacher_str = "WideResNet-{}-{}".format(wrn_depth_teacher, wrn_width_teacher)
+        student_str = "WideResNet-{}-{}".format(wrn_depth_student, wrn_width_student)
         logfile = "Teacher-{}-Student-{}-{}-M={}".format(teacher_str, student_str, kd_att_configurations.dataset, M)
-        with open('{}.txt'.format(logfile), 'w') as temp:
+        with open("{}.txt".format(logfile), "w") as temp:
             temp.write('KD_ATT with teacher {} and student {} in {} with M={}\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
     else:
         logfile = ''
