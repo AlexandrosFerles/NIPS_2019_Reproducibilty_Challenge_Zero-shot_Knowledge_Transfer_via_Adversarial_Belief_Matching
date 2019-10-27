@@ -123,7 +123,7 @@ def train(args):
             # No data
             elif M == 0:
                 from utils import cifar10loaders
-                _, test_loader = cifar10loaders
+                _, test_loader = cifar10loaders()
             else:
                 from utils import cifar10loadersM
                 loaders = cifar10loadersM(M)
@@ -146,7 +146,7 @@ def train(args):
             raise ValueError('Datasets to choose from: CIFAR10 and SVHN')
 
         if log:
-            with open(logfile, 'a') as temp:
+            with open(os.path.join('./', logfile), "a") as temp:
                 temp.write('------------------- SEED {} -------------------\n'.format(seed))
 
         strides = [1, 1, 2, 2]
