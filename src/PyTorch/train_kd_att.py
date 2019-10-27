@@ -92,10 +92,10 @@ def train(args):
     log = bool(kd_att_configurations.checkpoint)
 
     if log:
-        teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
-        student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
+        teacher_str = "WideResNet-{}-{}".format(wrn_depth_teacher, wrn_width_teacher)
+        student_str = "WideResNet-{}-{}".format(wrn_depth_student, wrn_width_student)
         logfile = "Teacher-{}-Student-{}-{}-M={}".format(teacher_str, student_str, kd_att_configurations.dataset, M)
-        with open('{}.txt'.format(logfile), 'w') as temp:
+        with open("{}.txt".format(logfile), "w") as temp:
             temp.write('KD_ATT with teacher {} and student {} in {} with M={}\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
     else:
         logfile = ''
@@ -167,13 +167,13 @@ def train(args):
             best_test_set_accuracy = _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
 
             if log:
-                with open(logfile, 'a') as temp:
+                with open("{}.txt".format(logfile), "a") as temp:
                     temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
             test_set_accuracies.append(best_test_set_accuracy)
 
             if log:
-                with open(logfile, 'a') as temp:
+                with open("{}.txt".format(logfile), "a") as temp:
                     temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
         else:
@@ -184,7 +184,7 @@ def train(args):
     mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
 
     if log:
-        with open(logfile, 'a') as temp:
+        with open("{}.txt".format(logfile), "a") as temp:
             temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
 
 
