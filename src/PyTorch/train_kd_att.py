@@ -77,7 +77,7 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 def train(args):
 
     json_options = json_file_to_pyobj(args.config)
-    kd_att_configurations = json_options.kd_att
+    kd_att_configurations = json_options.training
 
     wrn_depth_teacher = kd_att_configurations.wrn_depth_teacher
     wrn_width_teacher = kd_att_configurations.wrn_width_teacher
