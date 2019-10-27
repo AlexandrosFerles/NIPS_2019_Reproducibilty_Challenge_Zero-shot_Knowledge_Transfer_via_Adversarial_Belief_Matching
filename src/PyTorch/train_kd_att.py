@@ -35,7 +35,10 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 
     train_loader, test_loader = loaders
     epochs = int(200 * (50000 / M))
+<<<<<<< HEAD
     print(f'{epochs}')
+=======
+>>>>>>> 97b4fdc4a00f1565cd8a3e34ffdfb0da3b31cc1d
     epoch_thresholds = [int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
     optimizer = optim.SGD(student_net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
@@ -65,7 +68,11 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
         epoch_accuracy = _test_set_eval(student_net, device, test_loader)
 
         if log:
+<<<<<<< HEAD
             with open("{}.txt".format(logfile), "a") as temp:
+=======
+            with open(os.path.join('./', logfile), "a") as temp:
+>>>>>>> 97b4fdc4a00f1565cd8a3e34ffdfb0da3b31cc1d
                 temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
 
         if epoch_accuracy > best_test_set_accuracy:
@@ -124,7 +131,7 @@ def train(args):
             # No data
             elif M == 0:
                 from utils import cifar10loaders
-                _, test_loader = cifar10loaders
+                _, test_loader = cifar10loaders()
             else:
                 from utils import cifar10loadersM
                 loaders = cifar10loadersM(M)
@@ -147,7 +154,7 @@ def train(args):
             raise ValueError('Datasets to choose from: CIFAR10 and SVHN')
 
         if log:
-            with open(logfile, 'a') as temp:
+            with open(os.path.join('./', logfile), "a") as temp:
                 temp.write('------------------- SEED {} -------------------\n'.format(seed))
 
         strides = [1, 1, 2, 2]
@@ -169,13 +176,21 @@ def train(args):
             best_test_set_accuracy = _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
 
             if log:
+<<<<<<< HEAD
                 with open("{}.txt".format(logfile), "a") as temp:
+=======
+                with open(os.path.join('./', logfile), "a") as temp:
+>>>>>>> 97b4fdc4a00f1565cd8a3e34ffdfb0da3b31cc1d
                     temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
             test_set_accuracies.append(best_test_set_accuracy)
 
             if log:
+<<<<<<< HEAD
                 with open("{}.txt".format(logfile), "a") as temp:
+=======
+                with open(os.path.join('./', logfile), "a") as temp:
+>>>>>>> 97b4fdc4a00f1565cd8a3e34ffdfb0da3b31cc1d
                     temp.write('Best test set accuracy of seed {} is {}\n'.format(seed, best_test_set_accuracy))
 
         else:
@@ -186,7 +201,11 @@ def train(args):
     mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
 
     if log:
+<<<<<<< HEAD
         with open("{}.txt".format(logfile), "a") as temp:
+=======
+        with open(os.path.join('./', logfile), "a") as temp:
+>>>>>>> 97b4fdc4a00f1565cd8a3e34ffdfb0da3b31cc1d
             temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
 
 
