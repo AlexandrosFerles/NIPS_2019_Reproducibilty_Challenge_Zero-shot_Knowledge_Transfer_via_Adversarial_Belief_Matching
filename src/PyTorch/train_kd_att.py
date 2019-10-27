@@ -4,8 +4,30 @@ import numpy as np
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
 from utils import adjust_learning_rate, kd_att_loss
-
 from train_scratches import set_seed
+
+
+def _test_set_eval(net, device, test_loader):
+
+    with torch.no_grad():
+
+        correct, total = 0, 0
+        net.eval()
+
+        for data in test_loader:
+            images, labels = data
+            images = images.to(device)
+            labels = labels.to(device)
+
+            outputs = net(images)[0]
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+        accuracy = correct / total
+        accuracy = round(100 * accuracy, 2)
+
+        return accuracy
 
 
 def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
@@ -38,34 +60,16 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 
         optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
 
-        with torch.no_grad():
+        epoch_accuracy = _test_set_eval(student_net, device, test_loader)
 
-            correct = 0
-            total = 0
+        if log:
+            with open(logfile, 'a') as temp:
+                temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
 
-            student_net.eval()
-            for data in test_loader:
-                images, labels = data
-                images = images.to(device)
-                labels = labels.to(device)
-
-                student_net(images)
-                outputs = student_net(images)[0]
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-
-            epoch_accuracy = correct / total
-            epoch_accuracy = round(100 * epoch_accuracy, 2)
-
-            if log:
-                with open(logfile, 'a') as temp:
-                    temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
-
-            if epoch_accuracy > best_test_set_accuracy:
-                best_test_set_accuracy = epoch_accuracy
-                if checkpoint:
-                    torch.save(student_net.state_dict(), checkpointFile)
+        if epoch_accuracy > best_test_set_accuracy:
+            best_test_set_accuracy = epoch_accuracy
+            if checkpoint:
+                torch.save(student_net.state_dict(), checkpointFile)
 
     return best_test_set_accuracy
 
@@ -173,27 +177,8 @@ def train(args):
 
         else:
 
-            with torch.no_grad():
-
-                correct = 0
-                total = 0
-
-                student_net.eval()
-                for data in test_loader:
-                    images, labels = data
-                    images = images.to(device)
-                    labels = labels.to(device)
-
-                    student_net(images)
-                    outputs = student_net(images)[0]
-                    _, predicted = torch.max(outputs.data, 1)
-                    total += labels.size(0)
-                    correct += (predicted == labels).sum().item()
-
-                best_test_set_accuracy = correct / total
-                best_test_set_accuracy = round(100 * best_test_set_accuracy, 2)
-
-                test_set_accuracies.append(best_test_set_accuracy)
+            best_test_set_accuracy = _test_set_eval(student_net, device, test_loader)
+            test_set_accuracies.append(best_test_set_accuracy)
 
     mean_test_set_accuracy, std_test_set_accuracy = np.mean(test_set_accuracies), np.std(test_set_accuracies)
 
