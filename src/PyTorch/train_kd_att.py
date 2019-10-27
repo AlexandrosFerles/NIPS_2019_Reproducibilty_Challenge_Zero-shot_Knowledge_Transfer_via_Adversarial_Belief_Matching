@@ -102,7 +102,6 @@ def train(args):
     else:
         logfile = ''
 
-    return
     checkpoint = bool(kd_att_configurations.checkpoint)
 
     if torch.cuda.is_available():
