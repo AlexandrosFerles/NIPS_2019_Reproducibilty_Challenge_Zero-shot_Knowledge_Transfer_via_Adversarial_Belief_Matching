@@ -7,53 +7,89 @@ import random
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
 from Generator import Generator
-from utils import adjust_learning_rate, kd_att_loss
+from utils import adjust_learning_rate, kd_att_loss, generator_loss, student_loss_zero_shot
 from train_scratches import set_seed
 
 
 def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
 
-    train_loader, test_loader = loaders
     # TODO: Find a way to include M too to calculate the number of epochs in generator
-    # TODO: Maybe they partcipate as samples in the number of pseudo batches
+    # TODO: Maybe they participate as samples in the number of pseudo batches
     epochs = 200 * (50000 / M)
 
-
-    # Hardcoded values from paper!
+    # Hardcoded values from paper and script training files of official GitHub repo!
     ng = 1
     ns = 10
-    total_batches = 128 # I think!
+    total_batches = 8e4
 
     student_optimizer = optim.Adam(student_net.parameters(), lr=2e-3)
     cosine_annealing_student = optim.lr_scheduler.CosineAnnealingLr(student_optimizer, total_batches)
-    generator_optimizer = optim.Adam(generator_net.parameters(), lr=2e-3)
+    generator_optimizer = optim.Adam(generator_net.parameters(), lr=1e-3)
     cosine_annealing_generator = optim.lr_scheduler.CosineAnnealingLr(generator_optimizer, total_batches)
 
     best_test_set_accuracy = 0
+    samples = []
     teacher_net.eval()
 
     for batch in range(total_batches):
 
         generator_net.train()
-        z =
         sample = generator_net()
+        samples.append(sample)
 
+        for _ in range(ng):
+
+            generator_optimizer.zero_grad()
+
+            student_out = student_net(sample)[0]
+            teacher_out = teacher_net(sample)[0]
+
+            gen_loss = generator_loss(student_out, teacher_out)
+            gen_loss.backward()
+            # Added from official repo!
+            torch.nn.utils.clip_grad_norm_(generator_optimizer.parameters(), 5)
+            generator_optimizer.step()
+
+        # TODO: Add in the report (gdoc first) that we originally thought that the samples
+        # TODO: Should be resampled before generator training
         student_net.train()
-        for i, data in enumerate(train_loader, 0):
-            inputs, labels = data
-            inputs = inputs.to(device)
-            labels = labels.to(device)
+        for _ in range(ns):
 
-            optimizer.zero_grad()
+            student_optimizer.zero_grad()
 
-            student_outputs = student_net(inputs)
-            teacher_outputs = teacher_net(inputs)
+            student_outputs = student_net(sample)
+            teacher_outputs = teacher_net(sample)
 
-            loss = kd_att_loss(student_outputs, teacher_outputs, labels)
+            loss = student_loss_zero_shot(student_outputs, teacher_outputs)
             loss.backward()
-            optimizer.step()
+            # Likewise!
+            torch.nn.utils.clip_grad_norm_(student_net.parameters(), 5)
+            student_optimizer.step()
 
-        optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
+        # TODO: Suppose that M is > 0, how and when should the extra samples participate?
+        # TODO: Let's assume that the training comes after the student update on generator's samples!
+
+        # TODO: Make sure that only test loader is added with M = 0 in train seed function
+        if M > 0:
+            train_loader, test_loader = loaders
+
+            # Train student on samples!
+            for i, data in enumerate(train_loader, 0):
+                inputs, labels = data
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+
+                student_optimizer.zero_grad()
+
+                student_outputs = student_net(inputs)
+                teacher_outputs = teacher_net(inputs)
+
+                loss = kd_att_loss(student_outputs, teacher_outputs, labels)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(student_net.parameters(), 5)
+                student_optimizer.step()
+        else:
+            test_loader = loaders
 
         with torch.no_grad():
 
@@ -72,20 +108,22 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
                 total += labels.size(0)
                 correct += (predicted == labels).sum().item()
 
-            epoch_accuracy = correct / total
-            epoch_accuracy = round(100 * epoch_accuracy, 2)
+            batch_accuracy = correct / total
+            batch_accuracy = round(100 * batch_accuracy, 2)
 
             if log:
                 with open(logfile, 'a') as temp:
-                    temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+                    temp.write('Accuracy at batch {} is {}%\n'.format(batch + 1, batch_accuracy))
 
-            if epoch_accuracy > best_test_set_accuracy:
-                best_test_set_accuracy = epoch_accuracy
+            if batch_accuracy > best_test_set_accuracy:
+                best_test_set_accuracy = batch_accuracy
                 if checkpoint:
                     torch.save(student_net.state_dict(), checkpointFile)
 
-    # TODO: Return generated samples too
-    return best_test_set_accuracy
+        cosine_annealing_generator.step()
+        cosine_annealing_student.step()
+
+    return best_test_set_accuracy, samples
 
 
 def train(args):
@@ -179,7 +217,7 @@ def train(args):
         generator_net = generator_net.to(device)
 
         # TODO: Maybe I should use M in checkpoint file name too
-        checkpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, dataset, seed) if checkpoint else ''
+        checkpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M={}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
 
         best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
 
