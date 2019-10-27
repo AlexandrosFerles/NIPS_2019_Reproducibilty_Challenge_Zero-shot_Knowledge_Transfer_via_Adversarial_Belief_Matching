@@ -5,7 +5,7 @@ from utils import json_file_to_pyobj
 from WideResNet import WideResNet
 from utils import adjust_learning_rate, kd_att_loss
 from train_scratches import set_seed
-
+import os
 
 def _test_set_eval(net, device, test_loader):
 
@@ -77,7 +77,7 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 def train(args):
 
     json_options = json_file_to_pyobj(args.config)
-    kd_att_configurations = json_options.kd_att
+    kd_att_configurations = json_options.training
 
     wrn_depth_teacher = kd_att_configurations.wrn_depth_teacher
     wrn_width_teacher = kd_att_configurations.wrn_width_teacher
@@ -93,7 +93,7 @@ def train(args):
     if log:
         teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
         student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
-        logfile = 'Teacher-{}-Student-{}-{}-M={}'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
+        logfile = 'Teacher-{}-Student-{}-{}-M={}.txt'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
         with open(logfile, 'w') as temp:
             temp.write('KD_ATT with teacher {} and student {} in {} with M=\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
     else:
@@ -185,3 +185,18 @@ def train(args):
     if log:
         with open(logfile, 'a') as temp:
             temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
+
+
+if __name__ == '__main__':
+    import argparse
+
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
+
+    parser = argparse.ArgumentParser(description='WideResNet Scratches')
+
+    parser.add_argument('-config', '--config', help='Training Configurations', required=True)
+
+    args = parser.parse_args()
+
+    train(args)
