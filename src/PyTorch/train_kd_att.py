@@ -7,6 +7,7 @@ from utils import adjust_learning_rate, kd_att_loss
 from train_scratches import set_seed
 import os
 
+
 def _test_set_eval(net, device, test_loader):
 
     with torch.no_grad():
@@ -64,7 +65,7 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
         epoch_accuracy = _test_set_eval(student_net, device, test_loader)
 
         if log:
-            with open(logfile, 'a') as temp:
+            with open("{}.txt".format(logfile), "a") as temp:
                 temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
 
         if epoch_accuracy > best_test_set_accuracy:
