@@ -119,7 +119,7 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10):
     total_collected = 0
     success = 10 * M
     indices = []
-    for index, (_, label) in temp_trainloader:
+    for index, (_, label) in enumerate(temp_trainloader):
         if data_collected[label] < M:
             data_collected[label] += 1
             indices.append(index)
