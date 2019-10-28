@@ -112,7 +112,7 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10):
     transform = dataset_transforms('svhn')
 
     trainset = torchvision.datasets.SVHN(root='./data', split='train', download=True, transform=transform)
-    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=0)
+    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, num_workers=0)
 
     # sample M data per_class
     data_collected = [0] * 10
