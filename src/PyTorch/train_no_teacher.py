@@ -40,7 +40,7 @@ def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False,
     epoch_thresholds = [int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
+    optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
     best_test_set_accuracy = 0
 
     for epoch in range(epochs):
@@ -168,3 +168,18 @@ def train(args):
     if log:
         with open(os.path.join('./', logfile), "a") as temp:
             temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
+
+
+if __name__ == '__main__':
+    import argparse
+
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
+
+    parser = argparse.ArgumentParser(description='WideResNet Scratches')
+
+    parser.add_argument('-config', '--config', help='Training Configurations', required=True)
+
+    args = parser.parse_args()
+
+    train(args)
