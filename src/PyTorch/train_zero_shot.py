@@ -204,9 +204,9 @@ def train(args):
         teacher_net = WideResNet(d=wrn_depth_teacher, k=wrn_width_teacher, n_classes=10, input_features=3, output_features=16, strides=strides)
         teacher_net = teacher_net.to(device)
         if dataset == 'cifar10':
-            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed), map_location=device)
         else:
-            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed), map_location=device)
         teacher_net.load_state_dict(torch_checkpoint)
 
         student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3, output_features=16, strides=strides)
@@ -217,7 +217,10 @@ def train(args):
 
         checkpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
 
-        best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
+        if M > 0:
+            best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
+        else:
+            best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, test_loader, device, log, checkpoint, logfile, checkpointFile)
 
         if log:
             with open(logfile, 'a') as temp:
@@ -234,3 +237,18 @@ def train(args):
     if log:
         with open(logfile, 'a') as temp:
             temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
+
+
+if __name__ == '__main__':
+    import argparse
+
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
+
+    parser = argparse.ArgumentParser(description='WideResNet Scratches')
+
+    parser.add_argument('-config', '--config', help='Training Configurations', required=True)
+
+    args = parser.parse_args()
+
+    train(args)

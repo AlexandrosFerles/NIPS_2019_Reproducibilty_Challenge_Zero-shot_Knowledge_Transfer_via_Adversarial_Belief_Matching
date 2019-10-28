@@ -3,9 +3,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Generator(nn.Module):
 
     def __init__(self):
+        super(Generator, self).__init__()
 
         self.activation = nn.LeakyReLU(0.2, inplace=True)
 
