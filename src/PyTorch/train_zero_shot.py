@@ -11,11 +11,28 @@ from utils import adjust_learning_rate, kd_att_loss, generator_loss, student_los
 from train_scratches import set_seed
 
 
-def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
+def _test_set_eval(net, device, test_loader):
+    with torch.no_grad():
+        correct, total = 0, 0
+        net.eval()
 
-    # TODO: Find a way to include M too to calculate the number of epochs in generator
-    # TODO: Maybe they participate as samples in the number of pseudo batches
-    epochs = 200 * (50000 / M)
+        for data in test_loader:
+            images, labels = data
+            images = images.to(device)
+            labels = labels.to(device)
+
+            outputs = net(images)[0]
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+
+        accuracy = correct / total
+        accuracy = round(100 * accuracy, 2)
+
+        return accuracy
+
+
+def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
 
     # Hardcoded values from paper and script training files of official GitHub repo!
     ng = 1
@@ -91,34 +108,16 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
         else:
             test_loader = loaders
 
-        with torch.no_grad():
+        batch_accuracy = _test_set_eval(student_net, device, test_loader)
 
-            correct = 0
-            total = 0
+        if log:
+            with open(logfile, 'a') as temp:
+                temp.write('Accuracy at batch {} is {}%\n'.format(batch + 1, batch_accuracy))
 
-            student_net.eval()
-            for data in test_loader:
-                images, labels = data
-                images = images.to(device)
-                labels = labels.to(device)
-
-                student_net(images)
-                outputs = student_net(images)[0]
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-
-            batch_accuracy = correct / total
-            batch_accuracy = round(100 * batch_accuracy, 2)
-
-            if log:
-                with open(logfile, 'a') as temp:
-                    temp.write('Accuracy at batch {} is {}%\n'.format(batch + 1, batch_accuracy))
-
-            if batch_accuracy > best_test_set_accuracy:
-                best_test_set_accuracy = batch_accuracy
-                if checkpoint:
-                    torch.save(student_net.state_dict(), checkpointFile)
+        if batch_accuracy > best_test_set_accuracy:
+            best_test_set_accuracy = batch_accuracy
+            if checkpoint:
+                torch.save(student_net.state_dict(), checkpointFile)
 
         cosine_annealing_generator.step()
         cosine_annealing_student.step()
@@ -146,9 +145,9 @@ def train(args):
     if log:
         teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
         student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
-        logfile = 'Teacher-{}-Student-{}-{}-M={}-Zero-Shot'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
+        logfile = 'Teacher-{}-Student-{}-{}-M-{}-Zero-Shot'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
         with open(logfile, 'w') as temp:
-            temp.write('Zero-Shot with teacher {} and student {} in {} with M=\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
+            temp.write('Zero-Shot with teacher {} and student {} in {} with M-\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
     else:
         logfile = ''
 
@@ -165,7 +164,7 @@ def train(args):
 
         set_seed(seed)
 
-        if dataset == 'cifar10':
+        if dataset.lower() == 'cifar10':
 
             # Full data
             if M == 5000:
@@ -174,12 +173,12 @@ def train(args):
             # No data
             elif M == 0:
                 from utils import cifar10loaders
-                _, test_loader = cifar10loaders
+                _, test_loader = cifar10loaders()
             else:
                 from utils import cifar10loadersM
                 loaders = cifar10loadersM(M)
 
-        elif dataset == 'svhn':
+        elif dataset.lower() == 'svhn':
 
             # Full data
             if M == 5000:
@@ -194,7 +193,7 @@ def train(args):
                 loaders = svhnloadersM(M)
 
         else:
-            ValueError('Datasets to choose from: CIFAR10 and SVHN')
+            raise ValueError('Datasets to choose from: CIFAR10 and SVHN')
 
         if log:
             with open(logfile, 'a') as temp:
@@ -216,8 +215,7 @@ def train(args):
         generator_net = Generator()
         generator_net = generator_net.to(device)
 
-        # TODO: Maybe I should use M in checkpoint file name too
-        checkpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M={}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
+        checkpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
 
         best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
 
