@@ -60,7 +60,10 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 
         optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
 
-        if epoch > epoch_thresholds[-1] and (5000 / M) % epoch == 0:
+        if epoch % int((5000 / M)) == 0:
+            print('epoch : ', epoch)
+
+        if epoch > epoch_thresholds[-1] and epoch % int((5000 / M)) == 0:
             print('test acc eval in epoch ', epoch)
             epoch_accuracy = _test_set_eval(student_net, device, test_loader)
 
@@ -75,7 +78,6 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 
     if checkpoint:
         checkpoint_file_final = '{}-final-dict.pth'.format(checkpointFile.replace('-dict.pth', ''))
-
         torch.save(student_net.state_dict(), checkpoint_file_final)
 
     return best_test_set_accuracy

@@ -60,16 +60,27 @@ def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False,
             optimizer.step()
 
         optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
-        epoch_accuracy = _test_set_eval(net, device, test_loader)
 
-        if log:
-            with open(os.path.join('./', logfile), "a") as temp:
-                temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+        if epoch % int((5000 / M)) == 0:
+            print('epoch : ', epoch)
 
-        if epoch_accuracy > best_test_set_accuracy:
-            best_test_set_accuracy = epoch_accuracy
-            if checkpoint:
-                torch.save(net.state_dict(), checkpointFile)
+        if epoch > epoch_thresholds[-1] and epoch % int((5000 / M)) == 0:
+            print('test acc eval in epoch ', epoch)
+
+            epoch_accuracy = _test_set_eval(net, device, test_loader)
+
+            if log:
+                with open(os.path.join('./', logfile), "a") as temp:
+                    temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+
+            if epoch_accuracy > best_test_set_accuracy:
+                best_test_set_accuracy = epoch_accuracy
+                if checkpoint:
+                    torch.save(net.state_dict(), checkpointFile)
+
+    if checkpoint:
+        checkpoint_file_final = '{}-final-dict.pth'.format(checkpointFile.replace('-dict.pth', ''))
+        torch.save(net.state_dict(), checkpoint_file_final)
 
     return best_test_set_accuracy
 
