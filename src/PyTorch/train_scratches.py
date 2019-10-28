@@ -7,6 +7,7 @@ import random
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
 from utils import adjust_learning_rate
+from tqdm import tqdm
 
 
 def set_seed(seed=42):
@@ -26,7 +27,7 @@ def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', c
 
     best_test_set_accuracy = 0
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
 
         net.train()
         for i, data in enumerate(train_loader, 0):
@@ -44,34 +45,35 @@ def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', c
 
         optimizer = adjust_learning_rate(optimizer, epoch + 1)
 
-        with torch.no_grad():
+        if epoch >= 160:
+            with torch.no_grad():
 
-            correct = 0
-            total = 0
+                correct = 0
+                total = 0
 
-            net.eval()
-            for data in test_loader:
-                images, labels = data
-                images = images.to(device)
-                labels = labels.to(device)
+                net.eval()
+                for data in test_loader:
+                    images, labels = data
+                    images = images.to(device)
+                    labels = labels.to(device)
 
-                wrn_outputs = net(images)
-                outputs = wrn_outputs[0]
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+                    wrn_outputs = net(images)
+                    outputs = wrn_outputs[0]
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item()
 
-            epoch_accuracy = correct / total
-            epoch_accuracy = round(100 * epoch_accuracy, 2)
+                epoch_accuracy = correct / total
+                epoch_accuracy = round(100 * epoch_accuracy, 2)
 
-            if log:
-                with open(logfile, 'a') as temp:
-                    temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+                if log:
+                    with open(logfile, 'a') as temp:
+                        temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
 
-            if epoch_accuracy > best_test_set_accuracy:
-                best_test_set_accuracy = epoch_accuracy
-                if checkpoint:
-                    torch.save(net.state_dict(), checkpointFile)
+                if epoch_accuracy > best_test_set_accuracy:
+                    best_test_set_accuracy = epoch_accuracy
+                    if checkpoint:
+                        torch.save(net.state_dict(), checkpointFile)
 
     return best_test_set_accuracy
 

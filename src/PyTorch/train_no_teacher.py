@@ -7,6 +7,7 @@ from WideResNet import WideResNet
 from utils import adjust_learning_rate, kd_att_loss
 from train_scratches import set_seed
 import os
+from tqdm import tqdm
 
 
 def _test_set_eval(net, device, test_loader):
@@ -43,7 +44,7 @@ def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False,
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
     best_test_set_accuracy = 0
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
 
         net.train()
         for i, data in enumerate(train_loader, 0):
@@ -60,16 +61,23 @@ def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False,
             optimizer.step()
 
         optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
-        epoch_accuracy = _test_set_eval(net, device, test_loader)
 
-        if log:
-            with open(os.path.join('./', logfile), "a") as temp:
-                temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+        if epoch >= epoch_thresholds[-1] and epoch % int((5000 / M)) == 0:
 
-        if epoch_accuracy > best_test_set_accuracy:
-            best_test_set_accuracy = epoch_accuracy
-            if checkpoint:
-                torch.save(net.state_dict(), checkpointFile)
+            epoch_accuracy = _test_set_eval(net, device, test_loader)
+
+            if log:
+                with open(os.path.join('./', logfile), "a") as temp:
+                    temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+
+            if epoch_accuracy > best_test_set_accuracy:
+                best_test_set_accuracy = epoch_accuracy
+                if checkpoint:
+                    torch.save(net.state_dict(), checkpointFile)
+
+    if checkpoint:
+        checkpoint_file_final = '{}-final-dict.pth'.format(checkpointFile.replace('-dict.pth', ''))
+        torch.save(net.state_dict(), checkpoint_file_final)
 
     return best_test_set_accuracy
 
