@@ -137,13 +137,7 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10):
 
 def adjust_learning_rate(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
 
-    if epoch == epoch_thresholds[0]:
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = param_group["lr"] / 5
-    elif epoch == epoch_thresholds[1]:
-        for param_group in optimizer.param_groups:
-            param_group["lr"] = param_group["lr"] / 5
-    elif epoch == epoch_thresholds[2]:
+    if epoch == epoch_thresholds[0] or epoch == epoch_thresholds[1] or epoch == epoch_thresholds[2]:
         for param_group in optimizer.param_groups:
             param_group["lr"] = param_group["lr"] / 5
 
