@@ -181,7 +181,6 @@ def generator_loss(student_outputs, teacher_outputs, criterion=nn.KLDivLoss(), T
     return gen_loss
 
 
-# TODO: Needs debugging
 def student_loss_zero_shot(student_outputs, teacher_outputs, b=250):
 
     student_out, student_activations = student_outputs[0], student_outputs[1:]
@@ -189,7 +188,7 @@ def student_loss_zero_shot(student_outputs, teacher_outputs, b=250):
 
     activation_pairs = zip(student_activations, teacher_activations)
 
-    attention_losses = [attention_loss(att1, att2, T=1) for (att1, att2) in activation_pairs]
+    attention_losses = [attention_loss(att1, att2) for (att1, att2) in activation_pairs]
     loss_term1 = b * sum(attention_losses)
     loss = loss_term1 - generator_loss(student_out, teacher_out)
 
