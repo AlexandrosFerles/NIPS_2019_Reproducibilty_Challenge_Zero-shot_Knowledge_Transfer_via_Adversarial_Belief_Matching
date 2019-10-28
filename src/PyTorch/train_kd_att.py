@@ -34,7 +34,8 @@ def _test_set_eval(net, device, test_loader):
 def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
 
     train_loader, test_loader = loaders
-    epochs = int(200 * (50000 / M))
+    # or 50000 / (10*M) since M is sample per each one of 10 classes
+    epochs = int(200 * (5000 / M))
     epoch_thresholds = [int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
     optimizer = optim.SGD(student_net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
