@@ -53,9 +53,9 @@ def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False,
 
             optimizer.zero_grad()
 
-            student_outputs = net(inputs)
-
-            loss = criterion(student_outputs, labels)
+            wrn_outputs = net(inputs)
+            outputs = wrn_outputs[0]
+            loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
 
