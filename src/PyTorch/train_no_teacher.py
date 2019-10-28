@@ -40,7 +40,7 @@ def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False,
     epoch_thresholds = [int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(net(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
+    optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
     best_test_set_accuracy = 0
 
     for epoch in range(epochs):
