@@ -6,6 +6,7 @@ from WideResNet import WideResNet
 from utils import adjust_learning_rate, kd_att_loss
 from train_scratches import set_seed
 import os
+from tqdm import tqdm
 
 
 def _test_set_eval(net, device, test_loader):
@@ -41,7 +42,7 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
     best_test_set_accuracy = 0
     teacher_net.eval()
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
 
         student_net.train()
         for i, data in enumerate(train_loader, 0):
@@ -60,11 +61,8 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 
         optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
 
-        if epoch % int((5000 / M)) == 0:
-            print('epoch : ', epoch)
+        if epoch >= epoch_thresholds[-1] and epoch % int((5000 / M)) == 0:
 
-        if epoch > epoch_thresholds[-1] and epoch % int((5000 / M)) == 0:
-            print('test acc eval in epoch ', epoch)
             epoch_accuracy = _test_set_eval(student_net, device, test_loader)
 
             if log:
@@ -163,18 +161,14 @@ def train(args):
         teacher_net = WideResNet(d=wrn_depth_teacher, k=wrn_width_teacher, n_classes=10, input_features=3,
                                  output_features=16, strides=strides)
         teacher_net = teacher_net.to(device)
-        if dataset == 'cifar10':
-            torch_checkpoint = torch.load(
-                './PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher,
-                                                                                                   wrn_width_teacher,
-                                                                                                   seed),
-                map_location=device)
+        if dataset.lower() == 'cifar10':
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'
+                    .format(wrn_depth_teacher, wrn_width_teacher,seed),map_location=device)
         else:
             torch_checkpoint = torch.load(
-                './PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher,
-                                                                                                     wrn_width_teacher,
-                                                                                                     seed),
-                map_location=device)
+                './PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'
+                    .format(wrn_depth_teacher,wrn_width_teacher, seed),map_location=device)
+
         teacher_net.load_state_dict(torch_checkpoint)
 
         student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3,

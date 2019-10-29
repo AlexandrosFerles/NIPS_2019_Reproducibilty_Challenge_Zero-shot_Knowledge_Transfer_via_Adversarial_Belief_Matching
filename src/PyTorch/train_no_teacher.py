@@ -7,6 +7,7 @@ from WideResNet import WideResNet
 from utils import adjust_learning_rate, kd_att_loss
 from train_scratches import set_seed
 import os
+from tqdm import tqdm
 
 
 def _test_set_eval(net, device, test_loader):
@@ -43,7 +44,7 @@ def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False,
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
     best_test_set_accuracy = 0
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
 
         net.train()
         for i, data in enumerate(train_loader, 0):
@@ -61,11 +62,7 @@ def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False,
 
         optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
 
-        if epoch % int((5000 / M)) == 0:
-            print('epoch : ', epoch)
-
-        if epoch > epoch_thresholds[-1] and epoch % int((5000 / M)) == 0:
-            print('test acc eval in epoch ', epoch)
+        if epoch >= epoch_thresholds[-1] and epoch % int((5000 / M)) == 0:
 
             epoch_accuracy = _test_set_eval(net, device, test_loader)
 

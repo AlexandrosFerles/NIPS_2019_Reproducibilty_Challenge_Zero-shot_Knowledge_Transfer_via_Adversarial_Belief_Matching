@@ -165,7 +165,7 @@ def train(args):
 
         set_seed(seed)
 
-        if dataset == 'cifar10':
+        if dataset.lower() == 'cifar10':
 
             # Full data
             if M == 5000:
@@ -179,7 +179,7 @@ def train(args):
                 from utils import cifar10loadersM
                 loaders = cifar10loadersM(M)
 
-        elif dataset == 'svhn':
+        elif dataset.lower() == 'svhn':
 
             # Full data
             if M == 5000:
