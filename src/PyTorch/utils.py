@@ -176,7 +176,7 @@ def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, cr
 
 def generator_loss(student_outputs, teacher_outputs, criterion=nn.KLDivLoss(), T=1):
 
-    gen_loss = -criterion(F.log_softmax(student_outputs / T), F.softmax(teacher_outputs / T))
+    gen_loss = -criterion(F.log_softmax(student_outputs / T, dim=1), F.softmax(teacher_outputs / T, dim=1))
 
     return gen_loss
 
