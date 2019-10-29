@@ -1,0 +1,44 @@
+No teacher WideResNet-16-1 in CIFAR10 with M=10
+------------------- SEED 0 -------------------
+Accuracy at epoch 80501 is 23.34%
+Accuracy at epoch 81001 is 23.32%
+Accuracy at epoch 81501 is 23.29%
+Accuracy at epoch 82001 is 23.35%
+Accuracy at epoch 82501 is 23.51%
+Accuracy at epoch 83001 is 23.29%
+Accuracy at epoch 83501 is 23.6%
+Accuracy at epoch 84001 is 23.35%
+Accuracy at epoch 84501 is 23.34%
+Accuracy at epoch 85001 is 23.37%
+Accuracy at epoch 85501 is 23.39%
+Accuracy at epoch 86001 is 23.41%
+Accuracy at epoch 86501 is 23.47%
+Accuracy at epoch 87001 is 23.61%
+Accuracy at epoch 87501 is 23.47%
+Accuracy at epoch 88001 is 23.39%
+Accuracy at epoch 88501 is 23.46%
+Accuracy at epoch 89001 is 23.47%
+Accuracy at epoch 89501 is 23.45%
+Accuracy at epoch 90001 is 23.62%
+Accuracy at epoch 90501 is 23.48%
+Accuracy at epoch 91001 is 23.63%
+Accuracy at epoch 91501 is 23.58%
+Accuracy at epoch 92001 is 23.53%
+Accuracy at epoch 92501 is 23.52%
+Accuracy at epoch 93001 is 23.44%
+Accuracy at epoch 93501 is 23.64%
+Accuracy at epoch 94001 is 23.42%
+Accuracy at epoch 94501 is 23.52%
+Accuracy at epoch 95001 is 23.62%
+Accuracy at epoch 95501 is 23.56%
+Accuracy at epoch 96001 is 23.52%
+Accuracy at epoch 96501 is 23.59%
+Accuracy at epoch 97001 is 23.52%
+Accuracy at epoch 97501 is 23.58%
+Accuracy at epoch 98001 is 23.59%
+Accuracy at epoch 98501 is 23.7%
+Accuracy at epoch 99001 is 23.6%
+Accuracy at epoch 99501 is 23.64%
+Best test set accuracy of seed 0 is 23.7
+Best test set accuracy of seed 0 is 23.7
+------------------- SEED 1 -------------------

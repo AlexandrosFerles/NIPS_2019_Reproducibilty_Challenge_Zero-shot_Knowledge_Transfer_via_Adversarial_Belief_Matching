@@ -1,0 +1,11 @@
+{
+  "training":{
+    "dataset": "CIFAR10",
+    "wrn_depth": 16,
+    "wrn_width": 1,
+    "M": 100,
+    "seeds": "012",
+    "checkpoint": "True",
+    "log": "True"
+  }
+}

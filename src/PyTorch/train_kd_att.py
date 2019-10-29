@@ -6,12 +6,11 @@ from WideResNet import WideResNet
 from utils import adjust_learning_rate, kd_att_loss
 from train_scratches import set_seed
 import os
+from tqdm import tqdm
 
 
 def _test_set_eval(net, device, test_loader):
-
     with torch.no_grad():
-
         correct, total = 0, 0
         net.eval()
 
@@ -31,19 +30,19 @@ def _test_set_eval(net, device, test_loader):
         return accuracy
 
 
-def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
-
+def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='',
+                       checkpointFile=''):
     train_loader, test_loader = loaders
     # or 50000 / (10*M) since M is sample per each one of 10 classes
     epochs = int(200 * (5000 / M))
-    epoch_thresholds = [int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
+    epoch_thresholds = [int(x) for x in [0.3 * epochs, 0.6 * epochs, 0.8 * epochs]]
 
     optimizer = optim.SGD(student_net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
 
     best_test_set_accuracy = 0
     teacher_net.eval()
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
 
         student_net.train()
         for i, data in enumerate(train_loader, 0):
@@ -62,22 +61,27 @@ def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, 
 
         optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds=epoch_thresholds)
 
-        epoch_accuracy = _test_set_eval(student_net, device, test_loader)
+        if epoch >= epoch_thresholds[-1] and epoch % int((5000 / M)) == 0:
 
-        if log:
-            with open(os.path.join('./', logfile), "a") as temp:
-                temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+            epoch_accuracy = _test_set_eval(student_net, device, test_loader)
 
-        if epoch_accuracy > best_test_set_accuracy:
-            best_test_set_accuracy = epoch_accuracy
-            if checkpoint:
-                torch.save(student_net.state_dict(), checkpointFile)
+            if log:
+                with open(os.path.join('./', logfile), "a") as temp:
+                    temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+
+            if epoch_accuracy > best_test_set_accuracy:
+                best_test_set_accuracy = epoch_accuracy
+                if checkpoint:
+                    torch.save(student_net.state_dict(), checkpointFile)
+
+    if checkpoint:
+        checkpoint_file_final = '{}-final-dict.pth'.format(checkpointFile.replace('-dict.pth', ''))
+        torch.save(student_net.state_dict(), checkpoint_file_final)
 
     return best_test_set_accuracy
 
 
 def train(args):
-
     json_options = json_file_to_pyobj(args.config)
     kd_att_configurations = json_options.training
 
@@ -95,10 +99,12 @@ def train(args):
     if log:
         teacher_str = "WideResNet-{}-{}".format(wrn_depth_teacher, wrn_width_teacher)
         student_str = "WideResNet-{}-{}".format(wrn_depth_student, wrn_width_student)
-        logfile = "Teacher-{}-Student-{}-{}-M-{}.txt".format(teacher_str, student_str, kd_att_configurations.dataset, M)
+        logfile = "_Teacher-{}-Student-{}-{}-M-{}.txt".format(teacher_str, student_str, kd_att_configurations.dataset, M)
         print(logfile)
         with open(os.path.join('./', logfile), "w") as temp:
-            temp.write('KD_ATT with teacher {} and student {} in {} with M={}\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
+            temp.write('KD_ATT with teacher {} and student {} in {} with M={}\n'.format(teacher_str, student_str,
+                                                                                        kd_att_configurations.dataset,
+                                                                                        M))
     else:
         logfile = ''
 
@@ -152,21 +158,33 @@ def train(args):
 
         strides = [1, 1, 2, 2]
 
-        teacher_net = WideResNet(d=wrn_depth_teacher, k=wrn_width_teacher, n_classes=10, input_features=3, output_features=16, strides=strides)
+        teacher_net = WideResNet(d=wrn_depth_teacher, k=wrn_width_teacher, n_classes=10, input_features=3,
+                                 output_features=16, strides=strides)
         teacher_net = teacher_net.to(device)
-        if dataset == 'cifar10':
-            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed), map_location=device)
+        if dataset.lower() == 'cifar10':
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'
+                    .format(wrn_depth_teacher, wrn_width_teacher,seed),map_location=device)
         else:
-            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed), map_location=device)
+            torch_checkpoint = torch.load(
+                './PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'
+                    .format(wrn_depth_teacher,wrn_width_teacher, seed),map_location=device)
+
         teacher_net.load_state_dict(torch_checkpoint)
 
-        student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3, output_features=16, strides=strides)
+        student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3,
+                                 output_features=16, strides=strides)
         student_net = student_net.to(device)
 
-        checkpointFile = 'kd_att_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
+        checkpointFile = 'kd_att_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher,
+                                                                                                      wrn_width_teacher,
+                                                                                                      wrn_depth_student,
+                                                                                                      wrn_width_student,
+                                                                                                      M, seed,
+                                                                                                      dataset) if checkpoint else ''
         if M != 0:
 
-            best_test_set_accuracy = _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
+            best_test_set_accuracy = _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log, checkpoint,
+                                                        logfile, checkpointFile)
 
             if log:
                 with open(os.path.join('./', logfile), "a") as temp:
@@ -187,7 +205,9 @@ def train(args):
 
     if log:
         with open(os.path.join('./', logfile), "a") as temp:
-            temp.write('Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy, std_test_set_accuracy))
+            temp.write(
+                'Mean test set accuracy is {} with standard deviation equal to {}\n'.format(mean_test_set_accuracy,
+                                                                                            std_test_set_accuracy))
 
 
 if __name__ == '__main__':
