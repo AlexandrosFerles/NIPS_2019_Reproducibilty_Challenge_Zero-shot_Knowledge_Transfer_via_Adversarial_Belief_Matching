@@ -213,6 +213,10 @@ def train(args):
             print('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
             torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed), map_location=device)
         elif dataset.lower() == 'svhn':
+<<<<<<< HEAD
+=======
+            print('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed))
+>>>>>>> 1e90f589a7d84358d41a4350efdca9d322337929
             torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed), map_location=device)
         else:
             raise ValueError('Dataset not found')
