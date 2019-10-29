@@ -1,0 +1,46 @@
+No teacher WideResNet-16-1 in CIFAR10 with M=75
+------------------- SEED 0 -------------------
+Accuracy at epoch 10693 is 54.35%
+Accuracy at epoch 10759 is 54.24%
+Accuracy at epoch 10825 is 54.42%
+Accuracy at epoch 10891 is 54.35%
+Accuracy at epoch 10957 is 54.41%
+Accuracy at epoch 11023 is 54.11%
+Accuracy at epoch 11089 is 54.36%
+Accuracy at epoch 11155 is 54.14%
+Accuracy at epoch 11221 is 54.22%
+Accuracy at epoch 11287 is 54.39%
+Accuracy at epoch 11353 is 54.34%
+Accuracy at epoch 11419 is 54.33%
+Accuracy at epoch 11485 is 54.17%
+Accuracy at epoch 11551 is 54.27%
+Accuracy at epoch 11617 is 54.36%
+Accuracy at epoch 11683 is 54.25%
+Accuracy at epoch 11749 is 54.18%
+Accuracy at epoch 11815 is 54.26%
+Accuracy at epoch 11881 is 54.28%
+Accuracy at epoch 11947 is 54.33%
+Accuracy at epoch 12013 is 54.18%
+Accuracy at epoch 12079 is 54.22%
+Accuracy at epoch 12145 is 54.18%
+Accuracy at epoch 12211 is 54.17%
+Accuracy at epoch 12277 is 54.38%
+Accuracy at epoch 12343 is 54.43%
+Accuracy at epoch 12409 is 54.26%
+Accuracy at epoch 12475 is 54.21%
+Accuracy at epoch 12541 is 54.26%
+Accuracy at epoch 12607 is 54.34%
+Accuracy at epoch 12673 is 54.31%
+Accuracy at epoch 12739 is 54.3%
+Accuracy at epoch 12805 is 54.29%
+Accuracy at epoch 12871 is 54.45%
+Accuracy at epoch 12937 is 54.33%
+Accuracy at epoch 13003 is 54.41%
+Accuracy at epoch 13069 is 54.33%
+Accuracy at epoch 13135 is 54.27%
+Accuracy at epoch 13201 is 54.37%
+Accuracy at epoch 13267 is 54.29%
+Accuracy at epoch 13333 is 54.27%
+Best test set accuracy of seed 0 is 54.45
+Best test set accuracy of seed 0 is 54.45
+------------------- SEED 1 -------------------
