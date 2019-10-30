@@ -38,7 +38,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
     # Hardcoded values from paper and script training files of official GitHub repo!
     ng = 1
     ns = 10
-    total_batches = int(8e4)
+    total_batches = int(8**4)
 
     student_optimizer = optim.Adam(student_net.parameters(), lr=2e-3)
     cosine_annealing_student = optim.lr_scheduler.CosineAnnealingLR(student_optimizer, total_batches)
