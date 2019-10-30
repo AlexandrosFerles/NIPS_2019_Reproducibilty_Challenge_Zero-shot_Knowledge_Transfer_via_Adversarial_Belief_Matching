@@ -1,2 +1,25 @@
 KD_ATT with teacher WideResNet-40-2 and student WideResNet-16-1 in SVHN with M=100
 ------------------- SEED 0 -------------------
+Accuracy at epoch 4001 is 81.18%
+Accuracy at epoch 4051 is 80.65%
+Accuracy at epoch 4101 is 80.7%
+Accuracy at epoch 4151 is 80.84%
+Accuracy at epoch 4201 is 80.85%
+Accuracy at epoch 4251 is 80.87%
+Accuracy at epoch 4301 is 80.64%
+Accuracy at epoch 4351 is 80.44%
+Accuracy at epoch 4401 is 80.69%
+Accuracy at epoch 4451 is 80.61%
+Accuracy at epoch 4501 is 80.61%
+Accuracy at epoch 4551 is 80.58%
+Accuracy at epoch 4601 is 80.63%
+Accuracy at epoch 4651 is 80.43%
+Accuracy at epoch 4701 is 80.42%
+Accuracy at epoch 4751 is 80.85%
+Accuracy at epoch 4801 is 80.61%
+Accuracy at epoch 4851 is 80.67%
+Accuracy at epoch 4901 is 80.53%
+Accuracy at epoch 4951 is 80.73%
+Best test set accuracy of seed 0 is 81.18
+Best test set accuracy of seed 0 is 81.18
+Mean test set accuracy is 81.18 with standard deviation equal to 0.0
