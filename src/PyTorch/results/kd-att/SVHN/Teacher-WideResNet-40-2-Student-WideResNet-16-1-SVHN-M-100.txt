@@ -1,0 +1,2 @@
+KD_ATT with teacher WideResNet-40-2 and student WideResNet-16-1 in SVHN with M=100
+------------------- SEED 0 -------------------
