@@ -115,16 +115,17 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
         else:
             test_loader = loaders
 
-        batch_accuracy = _test_set_eval(student_net, device, test_loader)
+        if batch % 1000 == 0:
+            batch_accuracy = _test_set_eval(student_net, device, test_loader)
 
-        if log:
-            with open(logfile, 'a') as temp:
-                temp.write('Accuracy at batch {} is {}%\n'.format(batch + 1, batch_accuracy))
+            if log:
+                with open(logfile, 'a') as temp:
+                    temp.write('Accuracy at batch {} is {}%\n'.format(batch + 1, batch_accuracy))
 
-        if batch_accuracy > best_test_set_accuracy:
-            best_test_set_accuracy = batch_accuracy
-            if checkpoint:
-                torch.save(student_net.state_dict(), checkpointFile)
+            if batch_accuracy > best_test_set_accuracy:
+                best_test_set_accuracy = batch_accuracy
+                if checkpoint:
+                    torch.save(student_net.state_dict(), checkpointFile)
 
         cosine_annealing_generator.step()
         cosine_annealing_student.step()
