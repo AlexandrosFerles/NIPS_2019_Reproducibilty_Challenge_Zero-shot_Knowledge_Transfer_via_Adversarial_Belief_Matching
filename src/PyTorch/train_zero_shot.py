@@ -9,6 +9,7 @@ from WideResNet import WideResNet
 from Generator import Generator
 from utils import kd_att_loss, generator_loss, student_loss_zero_shot
 from train_scratches import set_seed
+from tqdm import tqdm 
 
 
 def _test_set_eval(net, device, test_loader):
@@ -48,7 +49,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
     samples = []
     teacher_net.eval()
 
-    for batch in range(total_batches):
+    for batch in tqdm(range(total_batches)):
 
         generator_net.train()
         # Hardcoded since batch size and noise dimension are constant
