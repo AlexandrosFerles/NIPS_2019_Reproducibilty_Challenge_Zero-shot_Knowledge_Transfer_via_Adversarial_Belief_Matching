@@ -46,7 +46,6 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
     cosine_annealing_generator = optim.lr_scheduler.CosineAnnealingLR(generator_optimizer, total_batches)
 
     best_test_set_accuracy = 0
-    samples = []
     teacher_net.eval()
 
     for batch in tqdm(range(total_batches)):
@@ -58,8 +57,6 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
 
             z = torch.randn((128, 100)).to(device)
             sample = generator_net(z)
-            samples.append(sample)
-
             generator_optimizer.zero_grad()
 
             student_out = student_net(sample)[0]
@@ -76,7 +73,6 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
 
             z = torch.randn((128, 100)).to(device)
             sample = generator_net(z)
-            samples.append(sample)
 
             student_optimizer.zero_grad()
 
@@ -133,7 +129,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
     torch.save(student_net.state_dict(), finalCheckpointFile)
     torch.save(generator_net.state_dict(), genCheckpointFile)
 
-    return best_test_set_accuracy, samples
+    return best_test_set_accuracy
 
 
 def train(args):
