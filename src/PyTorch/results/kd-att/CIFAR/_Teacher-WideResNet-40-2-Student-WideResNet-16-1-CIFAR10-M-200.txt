@@ -1,0 +1,45 @@
+KD_ATT with teacher WideResNet-40-2 and student WideResNet-16-1 in CIFAR10 with M=200
+------------------- SEED 0 -------------------
+Accuracy at epoch 4001 is 82.13%
+Accuracy at epoch 4026 is 82.36%
+Accuracy at epoch 4051 is 82.37%
+Accuracy at epoch 4076 is 82.18%
+Accuracy at epoch 4101 is 82.09%
+Accuracy at epoch 4126 is 82.41%
+Accuracy at epoch 4151 is 82.09%
+Accuracy at epoch 4176 is 82.03%
+Accuracy at epoch 4201 is 82.25%
+Accuracy at epoch 4226 is 82.22%
+Accuracy at epoch 4251 is 82.21%
+Accuracy at epoch 4276 is 82.17%
+Accuracy at epoch 4301 is 82.29%
+Accuracy at epoch 4326 is 82.05%
+Accuracy at epoch 4351 is 82.07%
+Accuracy at epoch 4376 is 82.34%
+Accuracy at epoch 4401 is 82.18%
+Accuracy at epoch 4426 is 82.37%
+Accuracy at epoch 4451 is 82.12%
+Accuracy at epoch 4476 is 81.93%
+Accuracy at epoch 4501 is 82.11%
+Accuracy at epoch 4526 is 82.11%
+Accuracy at epoch 4551 is 82.05%
+Accuracy at epoch 4576 is 82.2%
+Accuracy at epoch 4601 is 82.32%
+Accuracy at epoch 4626 is 82.25%
+Accuracy at epoch 4651 is 82.01%
+Accuracy at epoch 4676 is 82.04%
+Accuracy at epoch 4701 is 81.92%
+Accuracy at epoch 4726 is 82.11%
+Accuracy at epoch 4751 is 81.82%
+Accuracy at epoch 4776 is 82.17%
+Accuracy at epoch 4801 is 81.95%
+Accuracy at epoch 4826 is 81.98%
+Accuracy at epoch 4851 is 82.03%
+Accuracy at epoch 4876 is 82.21%
+Accuracy at epoch 4901 is 82.27%
+Accuracy at epoch 4926 is 82.14%
+Accuracy at epoch 4951 is 82.08%
+Accuracy at epoch 4976 is 81.94%
+Best test set accuracy of seed 0 is 82.41
+Best test set accuracy of seed 0 is 82.41
+Mean test set accuracy is 82.41 with standard deviation equal to 0.0
