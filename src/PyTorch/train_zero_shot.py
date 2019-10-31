@@ -122,6 +122,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
                 best_test_set_accuracy = batch_accuracy
                 if checkpoint:
                     torch.save(student_net.state_dict(), checkpointFile)
+                    torch.save(generator_net.state_dict(), genCheckpointFile)
 
         cosine_annealing_generator.step()
         cosine_annealing_student.step()
@@ -161,7 +162,7 @@ def train(args):
     checkpoint = bool(kd_att_configurations.checkpoint)
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:3')
+        device = torch.device('cuda:2')
     else:
         device = torch.device('cpu')
 
