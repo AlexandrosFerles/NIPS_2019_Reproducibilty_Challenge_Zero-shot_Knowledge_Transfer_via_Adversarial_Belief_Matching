@@ -118,7 +118,6 @@ def train(args):
     wrn_depth_student = kd_att_configurations.wrn_depth_student
     wrn_width_student = kd_att_configurations.wrn_width_student
 
-    # TODO: How to use that in few shot?
     M = kd_att_configurations.M
 
     dataset = kd_att_configurations.dataset
@@ -128,7 +127,7 @@ def train(args):
     if log:
         teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
         student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
-        logfile = 'Teacher-{}-Student-{}-{}-M-{}-Zero-Shot.txt'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
+        logfile = 'Reproducibility_Teacher-{}-Student-{}-{}-M-{}-Zero-Shot.txt'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
         with open(logfile, 'w') as temp:
             temp.write('Zero-Shot with teacher {} and student {} in {} with M-{}\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
     else:
@@ -200,9 +199,9 @@ def train(args):
         generator_net = Generator()
         generator_net = generator_net.to(device)
 
-        checkpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
-        finalCheckpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-final-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
-        genCheckpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-generator-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
+        checkpointFile = 'reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
+        finalCheckpointFile = 'reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-final-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
+        genCheckpointFile = 'reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-generator-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
 
         if M > 0:
             best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile, finalCheckpointFile, genCheckpointFile)
