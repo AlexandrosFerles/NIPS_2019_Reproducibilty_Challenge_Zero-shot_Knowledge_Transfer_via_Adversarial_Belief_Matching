@@ -1,3 +1,0 @@
-Zero-Shot with teacher WideResNet-40-2 and student WideResNet-16-1 in CIFAR10 with M-0
-------------------- SEED 0 -------------------
-Accuracy at batch 1 is 8.98%
