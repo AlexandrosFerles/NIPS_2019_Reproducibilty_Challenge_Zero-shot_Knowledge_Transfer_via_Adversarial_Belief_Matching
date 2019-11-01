@@ -103,7 +103,7 @@ def train(args):
     if log:
         teacher_str = "WideResNet-{}-{}".format(wrn_depth_teacher, wrn_width_teacher)
         student_str = "WideResNet-{}-{}".format(wrn_depth_student, wrn_width_student)
-        logfile = "Teacher-{}-Student-{}-{}-M-{}.txt".format(teacher_str, student_str, kd_att_configurations.dataset, M)
+        logfile = "Teacher-{}-Student-{}-{}-M-{}-seeds-1-2.txt".format(teacher_str, student_str, kd_att_configurations.dataset, M)
         print(logfile)
         with open(os.path.join('./', logfile), "w") as temp:
             temp.write('KD_ATT with teacher {} and student {} in {} with M={}\n'.format(teacher_str, student_str,
@@ -115,7 +115,7 @@ def train(args):
     checkpoint = bool(kd_att_configurations.checkpoint)
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:2')
+        device = torch.device('cuda:1')
     else:
         device = torch.device('cpu')
 
