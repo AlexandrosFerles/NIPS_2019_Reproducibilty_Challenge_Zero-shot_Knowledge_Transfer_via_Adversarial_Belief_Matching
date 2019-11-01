@@ -1,0 +1,88 @@
+KD_ATT with teacher WideResNet-40-2 and student WideResNet-16-1 in CIFAR10 with M=25
+------------------- SEED 0 -------------------
+Accuracy at epoch 32001 is 59.54%
+Accuracy at epoch 32201 is 59.72%
+Accuracy at epoch 32401 is 60.05%
+Accuracy at epoch 32601 is 59.81%
+Accuracy at epoch 32801 is 59.61%
+Accuracy at epoch 33001 is 59.84%
+Accuracy at epoch 33201 is 59.67%
+Accuracy at epoch 33401 is 60.02%
+Accuracy at epoch 33601 is 59.72%
+Accuracy at epoch 33801 is 59.99%
+Accuracy at epoch 34001 is 60.04%
+Accuracy at epoch 34201 is 59.92%
+Accuracy at epoch 34401 is 59.6%
+Accuracy at epoch 34601 is 59.59%
+Accuracy at epoch 34801 is 60.04%
+Accuracy at epoch 35001 is 59.82%
+Accuracy at epoch 35201 is 59.88%
+Accuracy at epoch 35401 is 59.94%
+Accuracy at epoch 35601 is 59.61%
+Accuracy at epoch 35801 is 59.86%
+Accuracy at epoch 36001 is 59.91%
+Accuracy at epoch 36201 is 59.7%
+Accuracy at epoch 36401 is 60.05%
+Accuracy at epoch 36601 is 59.79%
+Accuracy at epoch 36801 is 59.65%
+Accuracy at epoch 37001 is 59.44%
+Accuracy at epoch 37201 is 59.48%
+Accuracy at epoch 37401 is 59.71%
+Accuracy at epoch 37601 is 59.79%
+Accuracy at epoch 37801 is 59.96%
+Accuracy at epoch 38001 is 59.57%
+Accuracy at epoch 38201 is 60.02%
+Accuracy at epoch 38401 is 59.53%
+Accuracy at epoch 38601 is 59.59%
+Accuracy at epoch 38801 is 59.79%
+Accuracy at epoch 39001 is 59.64%
+Accuracy at epoch 39201 is 59.44%
+Accuracy at epoch 39401 is 59.63%
+Accuracy at epoch 39601 is 59.71%
+Accuracy at epoch 39801 is 59.94%
+Best test set accuracy of seed 0 is 60.05
+Best test set accuracy of seed 0 is 60.05
+------------------- SEED 1 -------------------
+Accuracy at epoch 32001 is 58.65%
+Accuracy at epoch 32201 is 58.77%
+Accuracy at epoch 32401 is 58.66%
+Accuracy at epoch 32601 is 58.52%
+Accuracy at epoch 32801 is 58.24%
+Accuracy at epoch 33001 is 58.75%
+Accuracy at epoch 33201 is 58.69%
+Accuracy at epoch 33401 is 58.82%
+Accuracy at epoch 33601 is 58.78%
+Accuracy at epoch 33801 is 58.73%
+Accuracy at epoch 34001 is 58.9%
+Accuracy at epoch 34201 is 58.57%
+Accuracy at epoch 34401 is 58.56%
+Accuracy at epoch 34601 is 58.6%
+Accuracy at epoch 34801 is 58.59%
+Accuracy at epoch 35001 is 58.48%
+Accuracy at epoch 35201 is 58.7%
+Accuracy at epoch 35401 is 58.57%
+Accuracy at epoch 35601 is 58.87%
+Accuracy at epoch 35801 is 58.48%
+Accuracy at epoch 36001 is 58.68%
+Accuracy at epoch 36201 is 58.72%
+Accuracy at epoch 36401 is 58.57%
+Accuracy at epoch 36601 is 58.63%
+Accuracy at epoch 36801 is 58.53%
+Accuracy at epoch 37001 is 58.92%
+Accuracy at epoch 37201 is 58.56%
+Accuracy at epoch 37401 is 58.32%
+Accuracy at epoch 37601 is 58.94%
+Accuracy at epoch 37801 is 58.77%
+Accuracy at epoch 38001 is 58.37%
+Accuracy at epoch 38201 is 58.77%
+Accuracy at epoch 38401 is 58.29%
+Accuracy at epoch 38601 is 58.64%
+Accuracy at epoch 38801 is 58.51%
+Accuracy at epoch 39001 is 58.49%
+Accuracy at epoch 39201 is 58.91%
+Accuracy at epoch 39401 is 58.65%
+Accuracy at epoch 39601 is 58.78%
+Accuracy at epoch 39801 is 58.72%
+Best test set accuracy of seed 1 is 58.94
+Best test set accuracy of seed 1 is 58.94
+------------------- SEED 2 -------------------
