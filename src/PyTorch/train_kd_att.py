@@ -30,11 +30,15 @@ def _test_set_eval(net, device, test_loader):
         return accuracy
 
 
-def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='',
+def _train_seed_kd_att(teacher_net, student_net, M, loaders, device, dataset, log=False, checkpoint=False,  logfile='',
                        checkpointFile=''):
     train_loader, test_loader = loaders
-    # or 50000 / (10*M) since M is sample per each one of 10 classes
-    epochs = int(200 * (5000 / M))
+    if dataset.lower() == 'cifar10':
+        # or 50000 / (10*M) since M is sample per each one of 10 classes
+        epochs = int(200 * (5000 / M))
+    else:
+        epochs = int(100 * (5000 / M))
+
     epoch_thresholds = [int(x) for x in [0.3 * epochs, 0.6 * epochs, 0.8 * epochs]]
 
     optimizer = optim.SGD(student_net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
@@ -99,7 +103,7 @@ def train(args):
     if log:
         teacher_str = "WideResNet-{}-{}".format(wrn_depth_teacher, wrn_width_teacher)
         student_str = "WideResNet-{}-{}".format(wrn_depth_student, wrn_width_student)
-        logfile = "Teacher-{}-Student-{}-{}-M-{}.txt".format(teacher_str, student_str, kd_att_configurations.dataset, M)
+        logfile = "Teacher-{}-Student-{}-{}-M-{}-seeds-1-2.txt".format(teacher_str, student_str, kd_att_configurations.dataset, M)
         print(logfile)
         with open(os.path.join('./', logfile), "w") as temp:
             temp.write('KD_ATT with teacher {} and student {} in {} with M={}\n'.format(teacher_str, student_str,
@@ -111,7 +115,7 @@ def train(args):
     checkpoint = bool(kd_att_configurations.checkpoint)
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:0')
+        device = torch.device('cuda:1')
     else:
         device = torch.device('cpu')
 
@@ -183,7 +187,7 @@ def train(args):
                                                                                                       dataset) if checkpoint else ''
         if M != 0:
 
-            best_test_set_accuracy = _train_seed_kd_att(teacher_net, student_net, M, loaders, device, log, checkpoint,
+            best_test_set_accuracy = _train_seed_kd_att(teacher_net, student_net, M, loaders, device, dataset, log, checkpoint,
                                                         logfile, checkpointFile)
 
             if log:

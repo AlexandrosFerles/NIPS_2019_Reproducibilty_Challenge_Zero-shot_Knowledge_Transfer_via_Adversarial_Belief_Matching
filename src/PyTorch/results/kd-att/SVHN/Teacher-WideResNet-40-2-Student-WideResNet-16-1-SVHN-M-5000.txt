@@ -1,0 +1,45 @@
+KD_ATT with teacher WideResNet-40-2 and student WideResNet-16-1 in SVHN with M=5000
+------------------- SEED 0 -------------------
+Accuracy at epoch 161 is 95.18%
+Accuracy at epoch 162 is 95.15%
+Accuracy at epoch 163 is 95.15%
+Accuracy at epoch 164 is 95.16%
+Accuracy at epoch 165 is 95.14%
+Accuracy at epoch 166 is 95.15%
+Accuracy at epoch 167 is 95.15%
+Accuracy at epoch 168 is 95.15%
+Accuracy at epoch 169 is 95.18%
+Accuracy at epoch 170 is 95.15%
+Accuracy at epoch 171 is 95.15%
+Accuracy at epoch 172 is 95.14%
+Accuracy at epoch 173 is 95.16%
+Accuracy at epoch 174 is 95.16%
+Accuracy at epoch 175 is 95.16%
+Accuracy at epoch 176 is 95.18%
+Accuracy at epoch 177 is 95.19%
+Accuracy at epoch 178 is 95.17%
+Accuracy at epoch 179 is 95.16%
+Accuracy at epoch 180 is 95.18%
+Accuracy at epoch 181 is 95.18%
+Accuracy at epoch 182 is 95.17%
+Accuracy at epoch 183 is 95.16%
+Accuracy at epoch 184 is 95.17%
+Accuracy at epoch 185 is 95.16%
+Accuracy at epoch 186 is 95.15%
+Accuracy at epoch 187 is 95.16%
+Accuracy at epoch 188 is 95.16%
+Accuracy at epoch 189 is 95.17%
+Accuracy at epoch 190 is 95.15%
+Accuracy at epoch 191 is 95.16%
+Accuracy at epoch 192 is 95.16%
+Accuracy at epoch 193 is 95.17%
+Accuracy at epoch 194 is 95.16%
+Accuracy at epoch 195 is 95.15%
+Accuracy at epoch 196 is 95.14%
+Accuracy at epoch 197 is 95.13%
+Accuracy at epoch 198 is 95.14%
+Accuracy at epoch 199 is 95.15%
+Accuracy at epoch 200 is 95.16%
+Best test set accuracy of seed 0 is 95.19
+Best test set accuracy of seed 0 is 95.19
+------------------- SEED 1 -------------------
