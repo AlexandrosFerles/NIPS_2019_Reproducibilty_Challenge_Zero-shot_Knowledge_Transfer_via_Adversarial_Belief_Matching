@@ -1,0 +1,8 @@
+No teacher WideResNet-16-1 in CIFAR10 with M=10
+------------------- SEED 1 -------------------
+Best test set accuracy of seed 1 is 0
+Best test set accuracy of seed 1 is 0
+------------------- SEED 2 -------------------
+Best test set accuracy of seed 2 is 0
+Best test set accuracy of seed 2 is 0
+Mean test set accuracy is 0.0 with standard deviation equal to 0.0
