@@ -193,3 +193,100 @@ def student_loss_zero_shot(student_outputs, teacher_outputs, b=250):
     loss = loss_term1 - generator_loss(student_out, teacher_out)
 
     return loss
+
+
+
+
+def plot_samples_from_generator():
+
+    from Generator import Generator
+    import numpy as np
+    import torchvision.utils as utils
+
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+
+    generator_net = Generator()
+    generator_net = generator_net.to(device)
+
+    checkpoints = ['checkpoints/CIFAR10/Zero-Shot/ours_zero_shot_teacher_wrn-40-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict.pth',
+                   'checkpoints/CIFAR10/Zero-Shot/ours_zero_shot_teacher_wrn-40-2_student_wrn-40-1-M-0-seed-1-CIFAR10-generator-dict.pth',
+                   'checkpoints/CIFAR10/Zero-Shot/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-2-CIFAR10-generator-dict.pth',
+                   'checkpoints/CIFAR10/Zero-Shot/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict.pth']
+
+    images = []
+    for checkpoint in checkpoints:
+        torch_checkpoint = torch.load(checkpoint, map_location=device)
+        generator_net.load_state_dict(torch_checkpoint)
+        print('passed checkpoint')
+        for i in np.arange(0,10):
+            z = torch.randn((128, 100)).to(device)
+            sample = generator_net(z)
+
+            # convert image to [0, 1]
+            # image = np.transpose(sample[0].detach().numpy(), [1,2,0])
+            image = sample[0].detach().numpy()
+            image = (image - image.min()) / (image.max() - image.min())
+
+            images.append(image)
+
+    utils.save_image(torch.Tensor(np.array(images)),'generator_samples.png',10)
+
+
+
+def plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, vid):
+
+    import matplotlib.pyplot as plt
+    import numpy as np
+    x = [0, 10, 25, 50, 75, 100]
+
+    fig = plt.figure()
+    ax = fig.gca()
+
+    ax.scatter(0, zero_shot[0],  marker='*', color='b', linestyle='--', s=150)
+    plt.plot(x, no_teacher, color='g', marker='o', markersize=3)
+    plt.plot(x, kd_att, marker='o', color='r', markersize=3)
+    plt.plot(x, kd_att_full, color='pink')
+    plt.plot(0, zero_shot[0], color='b', linestyle='--', marker='o', markersize=3)
+    # plt.plot(x, zero_shot, color='b', linestyle='--', marker='o', markersize=3)
+    plt.plot(100, vid, marker='*', color='gold')
+
+    plt.yticks(np.arange(0, 101, step=10))
+    plt.xlabel('M')
+    plt.ylabel('test accuracy(%)')
+    plt.legend(['No Teacher', 'KD+AT', 'KD+AT full data', 'Zero-Shot', 'vid'], loc='lower right')
+
+    plt.show()
+
+
+def plot_cifar():
+
+    # kd att is missing and zero shot with M
+    no_teacher = [10, 23.7 ,34.4 ,41.69 , 54.45, 57.02]
+    kd_att = [10 , 36.96, 60.05, 0, 73.84, 76.67]
+    kd_att_full = [92.15, 92.15 ,92.15 ,92.15 ,92.15 ,92.15 ]
+    zero_shot = [84.02, 84.02, 84.02, 84.02, 84.02, 84.02]
+    vid = [81.59]
+
+    plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, vid)
+
+def plot_svhn():
+
+    # only zero shot with M
+
+    no_teacher = [10, 11.97 ,31.83 ,44.08 , 50.07, 56.71]
+    kd_att = [10 , 37.35 ,48.71, 68.84, 78.51, 81.18]
+    kd_att_full = [95.19 , 95.19  ,95.19  ,95.19  ,95.19  ,95.19  ]
+    zero_shot = [94.21, 94.21, 94.21 , 94.21 , 94.21 , 94.21]
+    vid = [81.59]
+
+    plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, vid)
+
+
+if __name__=='__main__':
+    # plot_cifar()
+    # plot_svhn()
+
+    # plot_samples_from_generator()
