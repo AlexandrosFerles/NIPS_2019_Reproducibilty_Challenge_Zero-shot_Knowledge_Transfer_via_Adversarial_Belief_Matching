@@ -289,4 +289,4 @@ if __name__=='__main__':
     # plot_cifar()
     # plot_svhn()
 
-    # plot_samples_from_generator()
+    plot_samples_from_generator()
