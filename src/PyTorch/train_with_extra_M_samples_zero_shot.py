@@ -1,13 +1,13 @@
 import os
 import torch
 from torch import optim
-import torch.nn as nn
 import numpy as np
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
-from utils import kd_att_loss, generator_loss, student_loss_zero_shot
+from utils import kd_att_loss
 from copy import deepcopy
 from train_scratches import set_seed
+from tqdm import tqdm
 
 # approximately, we do not know the true values of this scenario
 epoch_dict = {
@@ -58,17 +58,17 @@ def _train_extra_M(teacher_net, student_net, M, loaders, device, log=False, chec
     best_test_set_accuracy = _test_set_eval(student_net, device, test_loader)
     if log:
         with open(logfile, 'a') as temp:
-            temp.write('Initial test accuracy is {}'.format(best_test_set_accuracy))
+            temp.write('Initial test accuracy is {}\n'.format(best_test_set_accuracy))
 
     student_optimizer = optim.Adam(student_net.parameters(), lr=5e-4)
     cosine_annealing_student = optim.lr_scheduler.CosineAnnealingLR(student_optimizer, epochs)
 
-    clone = deepcopy(student_net).detach()
+    clone = deepcopy(student_net)
 
     teacher_net.eval()
     student_net.eval()
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
         for i, data in enumerate(train_loader, 0):
             inputs, labels = data
             inputs = inputs.to(device)
@@ -88,7 +88,7 @@ def _train_extra_M(teacher_net, student_net, M, loaders, device, log=False, chec
             best_test_set_accuracy = accuracy
             if log:
                 with open(logfile, 'a') as temp:
-                    temp.write('New best test accuracy is {}'.format(best_test_set_accuracy))
+                    temp.write('New best test accuracy is {}\n'.format(best_test_set_accuracy))
 
             if checkpoint:
                 torch.save(student_net.state_dict(), checkpointFile)
@@ -107,9 +107,6 @@ def train(args):
     wrn_width_teacher = extra_M_configuration.wrn_width_teacher
     wrn_depth_student = extra_M_configuration.wrn_depth_student
     wrn_width_student = extra_M_configuration.wrn_width_student
-
-    teacher_checkpoint = extra_M_configuration.teacher_checkpoint
-    student_checkpoint = extra_M_configuration.student_checkpoint
 
     M = extra_M_configuration.M
 
@@ -141,31 +138,13 @@ def train(args):
 
         if dataset.lower() == 'cifar10':
 
-            # Full data
-            if M == 5000:
-                from utils import cifar10loaders
-                loaders = cifar10loaders()
-            # No data
-            elif M == 0:
-                from utils import cifar10loaders
-                _, test_loader = cifar10loaders()
-            else:
-                from utils import cifar10loadersM
-                loaders = cifar10loadersM(M)
+             from utils import cifar10loadersM
+             loaders = cifar10loadersM(M)
 
         elif dataset.lower() == 'svhn':
 
-            # Full data
-            if M == 5000:
-                from utils import svhnLoaders
-                loaders = svhnLoaders()
-            # No data
-            elif M == 0:
-                from utils import svhnLoaders
-                _, test_loader = svhnLoaders()
-            else:
-                from utils import svhnloadersM
-                loaders = svhnloadersM(M)
+            from utils import svhnloadersM
+            loaders = svhnloadersM(M)
 
         else:
             raise ValueError('Datasets to choose from: CIFAR10 and SVHN')
@@ -179,12 +158,26 @@ def train(args):
         teacher_net = WideResNet(d=wrn_depth_teacher, k=wrn_width_teacher, n_classes=10, input_features=3, output_features=16, strides=strides)
         teacher_net = teacher_net.to(device)
 
+        if dataset.lower() == 'cifar10':
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/CIFAR10/wrn-{}-{}-seed-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed), map_location=device)
+        elif dataset.lower() == 'svhn':
+            torch_checkpoint = torch.load('./PreTrainedModels/PreTrainedScratches/SVHN/wrn-{}-{}-seed-svhn-{}-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, seed), map_location=device)
+        else:
+            raise ValueError('Dataset not found')
+
+        teacher_net.load_state_dict(torch_checkpoint)
+
         student_net = WideResNet(d=wrn_depth_student, k=wrn_width_student, n_classes=10, input_features=3, output_features=16, strides=strides)
         student_net = student_net.to(device)
 
-        teacher_net.load_state_dict(torch.load(teacher_checkpoint))
-        student_net.load_state_dict(torch.load(student_checkpoint))
+        if dataset.lower() == 'cifar10':
+            torch_checkpoint = torch.load('./PreTrainedModels/Zero-Shot/CIFAR10/reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-CIFAR10-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, seed), map_location=device)
+        elif dataset.lower() == 'svhn':
+            torch_checkpoint = torch.load('./PreTrainedModels/Zero-Shot/SVHN/reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-SVHN-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, i, wrn_depth_student, wrn_width_student, seed), map_location=device)
+        else:
+            raise ValueError('Dataset not found')
 
+        student_net.load_state_dict(torch_checkpoint)
         if checkpoint:
             teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
             student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)

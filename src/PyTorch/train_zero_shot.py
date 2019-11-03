@@ -10,7 +10,8 @@ from Generator import Generator
 from utils import kd_att_loss, generator_loss, student_loss_zero_shot
 from train_scratches import set_seed
 from tqdm import tqdm 
-
+import wandb
+wandb.init()
 
 def _test_set_eval(net, device, test_loader):
     with torch.no_grad():
@@ -38,7 +39,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
     # Hardcoded values from paper and script training files of official GitHub repo!
     ng = 1
     ns = 10
-    total_batches = int(8e4)
+    total_batches = 65001
 
     student_optimizer = optim.Adam(student_net.parameters(), lr=2e-3)
     cosine_annealing_student = optim.lr_scheduler.CosineAnnealingLR(student_optimizer, total_batches)
@@ -81,6 +82,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
 
             student_loss = student_loss_zero_shot(student_outputs, teacher_outputs)
             student_loss.backward()
+            wandb.log({"Student loss": student_loss})
             # Likewise!
             torch.nn.utils.clip_grad_norm_(student_net.parameters(), 5)
             student_optimizer.step()
@@ -114,6 +116,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
         if batch % 1000 == 0:
             batch_accuracy = _test_set_eval(student_net, device, test_loader)
 
+            wandb.log({"Batch accuracy": batch_accuracy})
             if log:
                 with open(logfile, 'a') as temp:
                     temp.write('Accuracy at batch {} is {}%\n'.format(batch + 1, batch_accuracy))
