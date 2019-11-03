@@ -18,9 +18,15 @@ def set_seed(seed=42):
     torch.cuda.manual_seed(seed)
 
 
-def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
+def _train_seed(net, loaders, device, dataset, log=False, checkpoint=False, logfile='', checkpointFile=''):
     train_loader, test_loader = loaders
-    epochs = 200
+
+    if dataset.lower()=='cifar10':
+        epochs = 200
+    else:
+        epochs=100
+
+    epoch_thresholds=[int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
@@ -43,9 +49,9 @@ def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', c
             loss.backward()
             optimizer.step()
 
-        optimizer = adjust_learning_rate(optimizer, epoch + 1)
+        optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds)
 
-        if epoch >= 160:
+        if epoch >= epoch_thresholds[-1]:
             with torch.no_grad():
 
                 correct = 0
@@ -110,7 +116,7 @@ def train(args):
         ValueError('Datasets to choose from: CIFAR10 and SVHN')
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:2')
+        device = torch.device('cuda:0')
     else:
         device = torch.device('cpu')
 
@@ -128,7 +134,7 @@ def train(args):
         net = net.to(device)
 
         checkpointFile = '_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, dataset, seed) if checkpoint else ''
-        best_test_set_accuracy = _train_seed(net, loaders, device, log, checkpoint, logfile, checkpointFile)
+        best_test_set_accuracy = _train_seed(net, loaders, device, dataset, log, checkpoint, logfile, checkpointFile)
 
         if log:
             with open(logfile, 'a') as temp:
