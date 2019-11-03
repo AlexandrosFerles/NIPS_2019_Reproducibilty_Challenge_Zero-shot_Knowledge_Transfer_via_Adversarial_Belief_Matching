@@ -178,6 +178,7 @@ def train(args):
             raise ValueError('Dataset not found')
 
         student_net.load_state_dict(torch_checkpoint)
+
         if checkpoint:
             teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
             student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
