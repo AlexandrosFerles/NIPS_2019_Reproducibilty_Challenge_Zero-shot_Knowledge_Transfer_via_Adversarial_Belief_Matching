@@ -183,7 +183,7 @@ def get_matching_indices(dataset, teacher, student, device, n=1000):
 
     teacher.eval()
     student.eval()
-    for index, (images, label) in enumerate(testloader):
+    for index, (images, labels) in enumerate(testloader):
 
         images = images.to(device)
         labels = labels.to(device)
