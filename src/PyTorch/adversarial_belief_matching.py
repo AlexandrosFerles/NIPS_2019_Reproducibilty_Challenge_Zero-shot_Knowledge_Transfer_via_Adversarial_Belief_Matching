@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pickle
 import os
-from utils import json_file_to_pyobj
+from utils import json_file_to_pyobj, get_matching_indices
 from WideResNet import WideResNet
 from copy import deepcopy
 from tqdm import tqdm
@@ -95,21 +95,17 @@ def adversarial_belief_matching(args):
     mode = abm_configurations.mode
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:0')
+        device = torch.device('cuda:3')
     else:
         device = torch.device('cpu')
 
-    if dataset == 'cifar10':
-        from utils import cifar10loadersM
-        _, test_loader = cifar10loadersM(M=100, test_batch_size=1, apply_test=True)
-    elif dataset == 'svhn':
-        from utils import svhnLoadersM
-        _, test_loader = svhnLoadersM(M=100, test_batch_size=1, apply_test=True)
 
     print(test_loader.__len__())
     for seed in seeds:
 
         teacher_net, student_net = _load_teacher_and_student(abm_configurations, seed, device)
+        test_loader = get_matching_indices(dataset, teacher_net, student_net, device, n=1000)
+        cnt = test_loader.__len__()
 
         teacher_net.eval()
 
@@ -125,9 +121,8 @@ def adversarial_belief_matching(args):
         cnt = 0
         for data in tqdm(test_loader):
 
-            images, labels = data
+            images, _ = data
             images = images.to(device)
-            labels = labels.to(device)
 
             student_net.eval()
             student_outputs = student_net(images)[0]
@@ -137,15 +132,17 @@ def adversarial_belief_matching(args):
             _, teacher_predicted = torch.max(teacher_outputs.data, 1)
 
             if student_predicted == teacher_predicted:
-                cnt += 1
+
                 x0 = deepcopy(images.detach())
                 student_transition_curves, teacher_transition_curves = [], []
 
                 for fake_label in range(0, 10):
 
-                    student_probs_acc, teacher_probs_acc = [], []
+                    if fake_label != student_predicted:
 
-                    if fake_label != labels:
+                        fake_label = torch.Tensor([fake_label]).long().to(device)
+                        student_probs_acc, teacher_probs_acc = [], []
+
                         x_adv = deepcopy(x0)
                         x_adv.requires_grad = True
 
@@ -153,8 +150,7 @@ def adversarial_belief_matching(args):
                             student_fake_outputs = student_net(x_adv)[0]
                             with torch.no_grad():
                                 teacher_fake_outputs = teacher_net(x_adv)[0]
-
-                            loss = criterion(student_fake_outputs, labels)
+                            loss = criterion(student_fake_outputs, fake_label)
 
                             student_net.zero_grad()
                             loss.backward()
@@ -167,18 +163,21 @@ def adversarial_belief_matching(args):
                             pj_b = teacher_probs[0][fake_label].item()
                             pj_a = student_probs[0][fake_label].item()
 
-                            teacher_probs_acc.append(pj_b)
                             student_probs_acc.append(pj_a)
+                            teacher_probs_acc.append(pj_b)
 
                             mean_transition_error += abs(pj_b- pj_a)
 
                         student_transition_curves.append(student_probs_acc)
                         teacher_transition_curves.append(teacher_probs_acc)
+
                 else:
                     continue
 
-            student_image_average_transition_curves_acc.append(np.average(np.array(student_transition_curves), axis=0))
-            teacher_image_average_transition_curves_acc.append(np.average(np.array(teacher_transition_curves), axis=0))
+            if student_predicted == teacher_predicted:
+
+                student_image_average_transition_curves_acc.append(np.average(np.array(student_transition_curves), axis=0))
+                teacher_image_average_transition_curves_acc.append(np.average(np.array(teacher_transition_curves), axis=0))
 
         student_image_average_transition_curves_acc_np = np.average(np.array(student_image_average_transition_curves_acc), axis=0)
         teacher_image_average_transition_curves_acc_np = np.average(np.array(teacher_image_average_transition_curves_acc), axis=0)
