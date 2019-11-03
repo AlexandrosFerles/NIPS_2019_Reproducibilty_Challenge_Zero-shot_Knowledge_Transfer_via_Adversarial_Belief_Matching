@@ -99,8 +99,6 @@ def adversarial_belief_matching(args):
     else:
         device = torch.device('cpu')
 
-
-    print(test_loader.__len__())
     for seed in seeds:
 
         teacher_net, student_net = _load_teacher_and_student(abm_configurations, seed, device)
@@ -118,7 +116,6 @@ def adversarial_belief_matching(args):
         mean_transition_error = 0
 
         # count on how many test set samples teacher and student initially agree (and they are correct too!)
-        cnt = 0
         for data in tqdm(test_loader):
 
             images, _ = data
