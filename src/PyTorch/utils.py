@@ -55,10 +55,10 @@ def cifar10loaders(train_batch_size=128, test_batch_size=10):
     transform_train, transform_test = dataset_transforms('cifar10')
 
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=False, num_workers=0)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=False, num_workers=4)
 
     testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=0)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
     return trainloader, testloader
 
@@ -67,10 +67,10 @@ def svhnLoaders(train_batch_size=128, test_batch_size=10):
     transform = dataset_transforms('svhn')
 
     trainset = torchvision.datasets.SVHN(root='./data', split='train', download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=False, num_workers=0)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=False, num_workers=4)
 
     testset = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=0)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
     return trainloader, testloader
 
@@ -79,7 +79,7 @@ def cifar10loadersM(M, train_batch_size=128, test_batch_size=10, apply_test=Fals
     transform_train, transform_test = dataset_transforms('cifar10')
 
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
-    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, num_workers=0)
+    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, num_workers=4)
 
     # sample M data per_class
     data_collected = [0] * 10
@@ -98,7 +98,7 @@ def cifar10loadersM(M, train_batch_size=128, test_batch_size=10, apply_test=Fals
                                               sampler=SubsetRandomSampler(indices))
 
     testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=0)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
     if apply_test:
 
@@ -125,7 +125,7 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10, apply_test=False):
     transform = dataset_transforms('svhn')
 
     trainset = torchvision.datasets.SVHN(root='./data', split='train', download=True, transform=transform)
-    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=0)
+    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
 
     # sample M data per_class
     data_collected = [0] * 10
@@ -144,7 +144,7 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10, apply_test=False):
                                               sampler=SubsetRandomSampler(indices))
 
     testset = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=0)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
 
     if apply_test:
 
@@ -165,6 +165,45 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10, apply_test=False):
 
     else:
         return trainloader, testloader
+    
+    
+def get_matching_indices(dataset, teacher, student, device, n=1000):
+    
+    if dataset.lower() == 'cifar10':
+        _, transform_test = dataset_transforms('cifar10')
+        testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+    elif dataset.lower() == 'svhn':
+        _, transform_test = dataset_transforms('svhn')
+        testset = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transform_test)
+        
+    testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=True, num_workers=4)
+
+    total_collected = 0
+    indices = []
+
+    teacher.eval()
+    student.eval()
+    for index, (images, label) in enumerate(testloader):
+
+        images = images.to(device)
+        labels = labels.to(device)
+
+        student_outputs = student(images)[0]
+        _, student_predicted = torch.max(student_outputs.data, 1)
+
+        teacher_outputs = teacher(images)[0]
+        _, teacher_predicted = torch.max(teacher_outputs.data, 1)
+
+        if student_predicted == teacher_predicted:
+            indices.append(index)
+            total_collected += 1
+
+        if total_collected == n:
+            break
+
+    new_testloader = torch.utils.data.DataLoader(testset, batch_size=1, sampler=SubsetRandomSampler(indices))
+
+    return new_testloader
 
 
 def adjust_learning_rate(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
