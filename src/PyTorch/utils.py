@@ -161,7 +161,7 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10, apply_test=False):
                 break
 
         new_testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size,
-                                                     sampler=SubsetRandomSampler(indices))
+                                                     shuffle=False, sampler=SubsetRandomSampler(indices))
         return trainloader, new_testloader
 
     else:
