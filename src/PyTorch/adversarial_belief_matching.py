@@ -157,8 +157,9 @@ def adversarial_belief_matching(args):
                             teacher_probs = F.softmax(teacher_fake_outputs, dim=1)
                             student_probs = F.softmax(student_fake_outputs, dim=1)
 
-                            pj_b = teacher_probs[0][fake_label].item()
-                            pj_a = student_probs[0][fake_label].item()
+                            with torch.no_grad():
+                                pj_b = teacher_probs[0][fake_label].item()
+                                pj_a = student_probs[0][fake_label].item()
 
                             student_probs_acc.append(pj_a)
                             teacher_probs_acc.append(pj_b)
