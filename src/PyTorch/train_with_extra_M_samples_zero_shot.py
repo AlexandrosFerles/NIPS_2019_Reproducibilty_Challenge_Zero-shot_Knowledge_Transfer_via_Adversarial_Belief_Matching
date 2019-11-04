@@ -9,15 +9,6 @@ from copy import deepcopy
 from train_scratches import set_seed
 from tqdm import tqdm
 
-# approximately, we do not know the true values of this scenario
-epoch_dict = {
-    10: 1,
-    25: 5,
-    50: 20,
-    75: 40,
-    100: 75
-}
-
 
 def _test_set_eval(net, device, test_loader):
     with torch.no_grad():
@@ -51,9 +42,8 @@ def _loss_with_weight_regularization(student_outputs, teacher_outputs, labels, s
     return kd_at_loss + lamda*acc
 
 
-def _train_extra_M(teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile='', finalCheckpointFile='', genCheckpointFile=''):
+def _train_extra_M(epochs, teacher_net, student_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile='', finalCheckpointFile='', genCheckpointFile=''):
 
-    epochs = epoch_dict[M]
     train_loader, test_loader = loaders
     best_test_set_accuracy = _test_set_eval(student_net, device, test_loader)
     if log:
@@ -114,6 +104,13 @@ def train(args):
     seeds = [int(seed) for seed in extra_M_configuration.seeds]
     log = bool(extra_M_configuration.checkpoint)
 
+    if dataset.lower() == 'cifar10':
+        epochs = 200
+    elif dataset.lower() =='svhn':
+        epochs=100
+    else:
+        raise ValueError('Unknown dataset')
+
     if log:
         teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
         student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
@@ -126,7 +123,7 @@ def train(args):
     checkpoint = bool(extra_M_configuration.checkpoint)
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:0')
+        device = torch.device('cuda:2')
     else:
         device = torch.device('cpu')
 
@@ -173,7 +170,7 @@ def train(args):
         if dataset.lower() == 'cifar10':
             torch_checkpoint = torch.load('./PreTrainedModels/Zero-Shot/CIFAR10/reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-CIFAR10-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, seed), map_location=device)
         elif dataset.lower() == 'svhn':
-            torch_checkpoint = torch.load('./PreTrainedModels/Zero-Shot/SVHN/reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-SVHN-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, i, wrn_depth_student, wrn_width_student, seed), map_location=device)
+            torch_checkpoint = torch.load('./PreTrainedModels/Zero-Shot/SVHN/reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-SVHN-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, seed), map_location=device)
         else:
             raise ValueError('Dataset not found')
 
@@ -186,7 +183,7 @@ def train(args):
         else:
             checkpointFile = ''
 
-        best_test_set_accuracy = _train_extra_M(teacher_net, student_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
+        best_test_set_accuracy = _train_extra_M(epochs, teacher_net, student_net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
 
         test_set_accuracies.append(best_test_set_accuracy)
 

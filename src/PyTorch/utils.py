@@ -125,13 +125,14 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10, apply_test=False):
     transform = dataset_transforms('svhn')
 
     trainset = torchvision.datasets.SVHN(root='./data', split='train', download=True, transform=transform)
-    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=4)
+    temp_trainloader = torch.utils.data.DataLoader(trainset, batch_size=1, shuffle=True, num_workers=4)
 
     # sample M data per_class
     data_collected = [0] * 10
     total_collected = 0
     success = 10 * M
     indices = []
+
     for index, (_, label) in enumerate(temp_trainloader):
         if data_collected[label] < M:
             data_collected[label] += 1
@@ -165,17 +166,16 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10, apply_test=False):
 
     else:
         return trainloader, testloader
-    
-    
+
+
 def get_matching_indices(dataset, teacher, student, device, n=1000):
-    
     if dataset.lower() == 'cifar10':
         _, transform_test = dataset_transforms('cifar10')
         testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
     elif dataset.lower() == 'svhn':
         _, transform_test = dataset_transforms('svhn')
         testset = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transform_test)
-        
+
     testloader = torch.utils.data.DataLoader(testset, batch_size=1, shuffle=True, num_workers=4)
 
     total_collected = 0
@@ -348,3 +348,4 @@ def plot_svhn():
     zero_shot = [94.21, 94.21, 94.21, 94.21, 94.21, 94.21]
 
     plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot)
+
