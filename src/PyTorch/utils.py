@@ -304,7 +304,7 @@ def plot_samples_from_generator():
     utils.save_image(torch.Tensor(np.array(images)), 'generator_samples.png', 10)
 
 
-def plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, vid):
+def plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, title, vid=0.0, modified_zero_shot=None):
     import matplotlib.pyplot as plt
     import numpy as np
     x = [0, 10, 25, 50, 75, 100]
@@ -316,36 +316,96 @@ def plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, vid)
     plt.plot(x, no_teacher, color='g', marker='o', markersize=3)
     plt.plot(x, kd_att, marker='o', color='r', markersize=3)
     plt.plot(x, kd_att_full, color='pink')
-    plt.plot(0, zero_shot[0], color='b', linestyle='--', marker='o', markersize=3)
-    # plt.plot(x, zero_shot, color='b', linestyle='--', marker='o', markersize=3)
-    plt.plot(100, vid, marker='*', color='gold')
+    plt.plot(x, zero_shot, color='b', linestyle='--', marker='o', markersize=3)
+    if modified_zero_shot is not None:
+        plt.plot(x, modified_zero_shot, color='y', linestyle='--', marker='o', markersize=3)
 
+    legend_values = ['No Teacher', 'KD+AT', 'KD+AT full data', 'Zero-Shot']
+    if vid != 0:
+        plt.plot(100, vid, marker='*', color='gold')
+        legend_values.append('VID')
+
+    plt.legend(legend_values, loc = 'lower right')
     plt.yticks(np.arange(0, 101, step=10))
     plt.xlabel('M')
     plt.ylabel('test accuracy(%)')
-    plt.legend(['No Teacher', 'KD+AT', 'KD+AT full data', 'Zero-Shot', 'vid'], loc='lower right')
-
+    plt.title(title)
     plt.show()
 
 
-def plot_cifar():
-    # kd att is missing and zero shot with M
-    no_teacher = [10, 23.7, 34.4, 41.69, 54.45, 57.02]
-    kd_att = [10, 36.96, 60.05, 0, 73.84, 76.67]
-    kd_att_full = [92.15, 92.15, 92.15, 92.15, 92.15, 92.15]
-    zero_shot = [84.02, 84.02, 84.02, 84.02, 84.02, 84.02]
-    vid = [81.59]
+def plot_cifar(add_modified=False):
+    no_teacher = [10,
+                  ((23.7 + 21.68 + 25.86) / 3),
+                  ((34.4 + 38 + 36.07) / 3),
+                  ((41.69 + 44.2 + 45.27) / 3),
+                  ((54.45 + 51.89 + 50.99) / 3),
+                  ((57.02 + 56.87 + 56.69) / 3)]
 
-    plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, vid)
+    kd_att = [10,
+              (39.08 + 35.33 + 36.49) / 3,
+              (60.05 + 58.94 + 63.05) / 3,
+              (70.9 + 65.83 + 68.68) / 3,
+              (73.84 + 74.29 + 77) / 3,
+              (76.67 + 76.72 + 79.57) / 3]
+
+    kd_att_full_value = (92.15 + 92.25 + 92.17) / 3
+
+    kd_att_full = [kd_att_full_value, kd_att_full_value, kd_att_full_value,
+                   kd_att_full_value, kd_att_full_value, kd_att_full_value]
+
+    zero_shot = [
+        (83.73 + 83.76 + 83.42) / 3,
+        (83.89 + 83.37 + 83.77) / 3,
+        (84.08 + 83.57 + 84.22) / 3,
+        (84.69 + 84.37 + 84.94) / 3,
+        (84.98 + 84.53 + 85.0) / 3,
+        (85.27 + 84.73 + 85.35) / 3]
+
+    vid = 81.59
+
+    modified_zero_shot = None
+    if add_modified:
+        modified_zero_shot = [
+            (85.09 + 84.07 + 0) / 3,
+            (83.89 + 83.37 + 83.77) / 3,
+            (84.08 + 83.57 + 84.22) / 3,
+            (84.69 + 84.37 + 84.94) / 3,
+            (84.98 + 84.53 + 85.0) / 3,
+            (85.27 + 84.73 + 85.35) / 3]
+
+    plot_performance_for_models(no_teacher=no_teacher, kd_att=kd_att, kd_att_full=kd_att_full,
+                                zero_shot=zero_shot, modified_zero_shot=modified_zero_shot,
+                                title='CIFAR-10', vid=vid)
 
 
-def plot_svhn():
-    # only zero shot with M
+def plot_svhn(add_modified=False):
+    no_teacher = [10,
+                  ((11.97 + 12.67 + 11.73) / 3),
+                  ((31.83 + 34.21 + 26.82) / 3),
+                  ((44.08 + 45.93 + 42.93) / 3),
+                  ((50.07 + 41.88 + 53.96) / 3),
+                  ((56.71 + 69.58 + 59.56) / 3)]
 
-    no_teacher = [10, 11.97, 31.83, 44.08, 50.07, 56.71]
-    kd_att = [10, 37.35, 48.71, 68.84, 78.51, 81.18]
-    kd_att_full = [95.19, 95.19, 95.19, 95.19, 95.19, 95.19]
-    zero_shot = [94.21, 94.21, 94.21, 94.21, 94.21, 94.21]
+    kd_att = [10,
+              (37.35 + 31.32 + 33.88) / 3,
+              (48.71 + 48.89 + 47.44) / 3,
+              (68.84 + 65.33 + 66.48) / 3,
+              (78.51 + 78.4 + 79.28) / 3,
+              (81.18 + 79.63 + 81.45) / 3]
 
-    plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot)
+    kd_att_full_value = (95.19 + 95.44 + 95.72) / 3
+
+    kd_att_full = [kd_att_full_value, kd_att_full_value, kd_att_full_value,
+                   kd_att_full_value, kd_att_full_value, kd_att_full_value]
+
+    zero_shot = [
+        (94.21 + 93.85 + 93.94) / 3,
+        (94.29 + 93.9 + 94.07) / 3,
+        (94.26 + 93.97 + 93.98) / 3,
+        (94.26 + 93.94 + 93.97) / 3,
+        (94.27 + 93.95 + 93.94) / 3,
+        (94.24 + 93.97 + 93.94) / 3]
+
+    plot_performance_for_models(no_teacher=no_teacher, kd_att=kd_att, kd_att_full=kd_att_full,
+                                zero_shot=zero_shot, title='SVHN')
 
