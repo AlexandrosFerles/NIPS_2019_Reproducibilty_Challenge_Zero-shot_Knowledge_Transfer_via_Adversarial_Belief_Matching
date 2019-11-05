@@ -200,7 +200,7 @@ if __name__ == '__main__':
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
 
-    parser = argparse.ArgumentParser(description='WideResNet Scratches')
+    parser = argparse.ArgumentParser(description='Adversarial Belief Matching')
 
     parser.add_argument('-config', '--config', help='Training Configurations', required=True)
 
