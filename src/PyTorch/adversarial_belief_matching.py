@@ -52,12 +52,12 @@ def _load_teacher_and_student(abm_configurations, seed, device):
     if mode.lower() == 'kd-att':
         if dataset.lower() == 'cifar10':
             torch_checkpoint = torch.load(
-                './PreTrainedModels/KD-ATT/CIFAR10/kd_att_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-CIFAR10-dict.pth'.format(
+                './PreTrainedModels/KD-ATT/CIFAR10/kd_att_teacher_wrn-{}-{}_student_wrn-{}-{}-M-200-seed-{}-CIFAR10-dict.pth'.format(
                     wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, seed),
                 map_location=device)
         elif dataset.lower() == 'svhn':
             torch_checkpoint = torch.load(
-                './PreTrainedModels/KD-ATT/SVHN/kd_att_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-SVHN-dict.pth'.format(
+                './PreTrainedModels/KD-ATT/SVHN/kd_att_teacher_wrn-{}-{}_student_wrn-{}-{}-M-200-seed-{}-SVHN-dict.pth'.format(
                     wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, seed),
                 map_location=device)
         else:
@@ -95,14 +95,14 @@ def adversarial_belief_matching(args):
     mode = abm_configurations.mode
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:1')
+        device = torch.device('cuda:3')
     else:
         device = torch.device('cpu')
 
     for seed in seeds:
 
         teacher_net, student_net = _load_teacher_and_student(abm_configurations, seed, device)
-        test_loader = get_matching_indices(dataset, teacher_net, student_net, device, n=20)
+        test_loader = get_matching_indices(dataset, teacher_net, student_net, device, n=1000)
         cnt = test_loader.__len__()
 
         teacher_net.eval()
@@ -156,12 +156,13 @@ def adversarial_belief_matching(args):
                         teacher_probs = F.softmax(teacher_fake_outputs, dim=1)
                         student_probs = F.softmax(student_fake_outputs, dim=1)
 
-                        with torch.no_grad():
-                            pj_b = teacher_probs[0][fake_label].item()
-                            pj_a = student_probs[0][fake_label].item()
+                        pj_b = teacher_probs[0][fake_label].item()
+                        pj_a = student_probs[0][fake_label].item()
 
-                        student_probs_acc.append(pj_a)
-                        teacher_probs_acc.append(pj_b)
+                        print(str(abs(pj_b-pj_a)))
+                        with torch.no_grad():
+                            student_probs_acc.append(pj_a)
+                            teacher_probs_acc.append(pj_b)
 
                         mean_transition_error += abs(pj_b- pj_a)
 
@@ -200,7 +201,7 @@ if __name__ == '__main__':
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0, 1, 2, 3"
 
-    parser = argparse.ArgumentParser(description='Adversarial Belief Matching')
+    parser = argparse.ArgumentParser(description='WideResNet Scratches')
 
     parser.add_argument('-config', '--config', help='Training Configurations', required=True)
 
