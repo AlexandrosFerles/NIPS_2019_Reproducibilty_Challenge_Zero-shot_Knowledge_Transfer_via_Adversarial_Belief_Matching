@@ -6,7 +6,7 @@
     "wrn_depth_student": 16,
     "wrn_width_student": 1,
     "M": 0,
-    "seeds": "12",
+    "seeds": "0",
     "checkpoint": "True",
     "log": "True",
 	"mode": "Zero-Shot"
