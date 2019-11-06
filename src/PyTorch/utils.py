@@ -279,18 +279,27 @@ def plot_samples_from_generator():
     generator_net = Generator()
     generator_net = generator_net.to(device)
 
+    a = '/Users/leonidas/Dropbox (other account)/Dropbox/Reproducibility-NIPS-2019/Zero-Shot/CIFAR10-Generators/'
     checkpoints = [
-        'checkpoints/CIFAR10/Zero-Shot/ours_zero_shot_teacher_wrn-40-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict.pth',
-        'checkpoints/CIFAR10/Zero-Shot/ours_zero_shot_teacher_wrn-40-2_student_wrn-40-1-M-0-seed-1-CIFAR10-generator-dict.pth',
-        'checkpoints/CIFAR10/Zero-Shot/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-2-CIFAR10-generator-dict.pth',
-        'checkpoints/CIFAR10/Zero-Shot/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict.pth']
+        a + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-0.pth',
+        a + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-1000.pth',
+        a + 'reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-2-CIFAR10-generator-dict.pth',
+        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-16-1-M-0-seed-1-CIFAR10-generator-dict.pth',
+        a + 'reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict.pth',
+        a + 'reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-0-CIFAR10-generator-dict.pth',
+        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-40-1-M-0-seed-0-CIFAR10-generator-dict.pth',
+        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-16-2-M-0-seed-0-CIFAR10-generator-dict.pth',
+        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-16-1-M-0-seed-2-CIFAR10-generator-dict.pth',
+        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-40-1-M-0-seed-2-CIFAR10-generator-dict.pth',
+
+    ]
 
     images = []
     for checkpoint in checkpoints:
         torch_checkpoint = torch.load(checkpoint, map_location=device)
         generator_net.load_state_dict(torch_checkpoint)
         print('passed checkpoint')
-        for i in np.arange(0, 10):
+        for i in np.arange(0, 4):
             z = torch.randn((128, 100)).to(device)
             sample = generator_net(z)
 
@@ -301,7 +310,7 @@ def plot_samples_from_generator():
 
             images.append(image)
 
-    utils.save_image(torch.Tensor(np.array(images)), 'generator_samples.png', 10)
+    utils.save_image(torch.Tensor(np.array(images)), 'generator_samples.png', 4)
 
 
 def plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, title, vid=0.0, modified_zero_shot=None):
@@ -312,20 +321,22 @@ def plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, titl
     fig = plt.figure()
     ax = fig.gca()
 
-    ax.scatter(0, zero_shot[0], marker='*', color='b', linestyle='--', s=150)
+    # ax.scatter(0, zero_shot[0], marker='*', color='b', linestyle='--', s=150)
     plt.plot(x, no_teacher, color='g', marker='o', markersize=3)
     plt.plot(x, kd_att, marker='o', color='r', markersize=3)
     plt.plot(x, kd_att_full, color='pink')
     plt.plot(x, zero_shot, color='b', linestyle='--', marker='o', markersize=3)
-    if modified_zero_shot is not None:
-        plt.plot(x, modified_zero_shot, color='y', linestyle='--', marker='o', markersize=3)
 
     legend_values = ['No Teacher', 'KD+AT', 'KD+AT full data', 'Zero-Shot']
+    if modified_zero_shot is not None:
+        plt.plot(x, modified_zero_shot, color='y', linestyle='--', marker='o', markersize=3)
+        legend_values.append('Modified Zero-Shot')
+
     if vid != 0:
         plt.plot(100, vid, marker='*', color='gold')
         legend_values.append('VID')
 
-    plt.legend(legend_values, loc = 'lower right')
+    plt.legend(legend_values, loc='lower right')
     plt.yticks(np.arange(0, 101, step=10))
     plt.xlabel('M')
     plt.ylabel('test accuracy(%)')
@@ -366,19 +377,19 @@ def plot_cifar(add_modified=False):
     modified_zero_shot = None
     if add_modified:
         modified_zero_shot = [
-            (85.09 + 84.07 + 0) / 3,
-            (83.89 + 83.37 + 83.77) / 3,
-            (84.08 + 83.57 + 84.22) / 3,
-            (84.69 + 84.37 + 84.94) / 3,
-            (84.98 + 84.53 + 85.0) / 3,
-            (85.27 + 84.73 + 85.35) / 3]
+            (85.09 + 84.07 + 85.18) / 3,
+            (85.09 + 84.54 + 85.31) / 3,
+            (85.09 + 85.21 + 85.43 ) / 3,
+            (86.37 + 86.18 + 86.29) / 3,
+            (86.77 + 86.4  + 86.67) / 3,
+            (87.2 + 86.74 + 86.96) / 3]
 
     plot_performance_for_models(no_teacher=no_teacher, kd_att=kd_att, kd_att_full=kd_att_full,
                                 zero_shot=zero_shot, modified_zero_shot=modified_zero_shot,
                                 title='CIFAR-10', vid=vid)
 
 
-def plot_svhn(add_modified=False):
+def plot_svhn():
     no_teacher = [10,
                   ((11.97 + 12.67 + 11.73) / 3),
                   ((31.83 + 34.21 + 26.82) / 3),
@@ -409,3 +420,9 @@ def plot_svhn(add_modified=False):
     plot_performance_for_models(no_teacher=no_teacher, kd_att=kd_att, kd_att_full=kd_att_full,
                                 zero_shot=zero_shot, title='SVHN')
 
+
+if __name__ == '__main__':
+    # plot_samples_from_generator()
+
+    plot_cifar(True)
+    # plot_svhn()
