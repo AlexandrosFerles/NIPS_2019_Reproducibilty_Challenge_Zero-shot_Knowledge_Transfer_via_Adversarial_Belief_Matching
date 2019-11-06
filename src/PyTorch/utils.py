@@ -276,18 +276,44 @@ def plot_samples_from_generator():
     generator_net = Generator()
     generator_net = generator_net.to(device)
 
-    a = '/Users/leonidas/Dropbox (other account)/Dropbox/Reproducibility-NIPS-2019/Zero-Shot/CIFAR10-Generators/'
+    path = 'Reproducibility-NIPS-2019/Zero-Shot/CIFAR10-Generators/'
     checkpoints = [
-        a + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-0.pth',
-        a + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-1000.pth',
-        a + 'reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-2-CIFAR10-generator-dict.pth',
-        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-16-1-M-0-seed-1-CIFAR10-generator-dict.pth',
-        a + 'reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict.pth',
-        a + 'reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-0-CIFAR10-generator-dict.pth',
-        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-40-1-M-0-seed-0-CIFAR10-generator-dict.pth',
-        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-16-2-M-0-seed-0-CIFAR10-generator-dict.pth',
-        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-16-1-M-0-seed-2-CIFAR10-generator-dict.pth',
-        a + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-40-1-M-0-seed-2-CIFAR10-generator-dict.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-0.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator0-dict_diff_hyperparams.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator300-dict.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator700-dict.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator1000-dict_diff_hyperparams.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-1000.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator2500-dict.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator3000-dict_diff_hyperparams.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-5000.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator5000-dict_diff_hyperparams.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-8000.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-2-CIFAR10-generator-dict-8000.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-10000.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-1-M-0-seed-1-CIFAR10-generator-dict-20000.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-2-CIFAR10-generator-dict-20000.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-25000.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-2-CIFAR10-generator-dict-25000.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-16-2_student_wrn-16-1-M-0-seed-0-CIFAR10-generator-dict-30000.pth',
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-1-M-0-seed-1-CIFAR10-generator-dict-30000.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-1-M-0-seed-1-CIFAR10-generator-dict-35000.pth',
+
+        path + 'middle-generators/reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-1-M-0-seed-1-CIFAR10-generator-dict-40000.pth',
+
+        # final
+        path + 'reproducibility_zero_shot_teacher_wrn-40-1_student_wrn-16-2-M-0-seed-1-CIFAR10-generator-dict.pth',
+        path + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-16-1-M-0-seed-2-CIFAR10-generator-dict.pth',
+        path + 'reproducibility_zero_shot_teacher_wrn-40-2_student_wrn-16-1-M-0-seed-1-CIFAR10-generator-dict.pth',
 
     ]
 
@@ -296,7 +322,7 @@ def plot_samples_from_generator():
         torch_checkpoint = torch.load(checkpoint, map_location=device)
         generator_net.load_state_dict(torch_checkpoint)
         print('passed checkpoint')
-        for i in np.arange(0, 4):
+        for i in np.arange(0, 1):
             z = torch.randn((128, 100)).to(device)
             sample = generator_net(z)
 
@@ -307,7 +333,7 @@ def plot_samples_from_generator():
 
             images.append(image)
 
-    utils.save_image(torch.Tensor(np.array(images)), 'generator_samples.png', 4)
+    utils.save_image(torch.Tensor(np.array(images)), 'generator_samples.png', 2)
 
 
 def plot_performance_for_models(no_teacher, kd_att, kd_att_full, zero_shot, title, vid=0.0, modified_zero_shot=None):
@@ -418,3 +444,8 @@ def plot_svhn():
                                 zero_shot=zero_shot, title='SVHN')
 
 
+if __name__ == '__main__':
+    plot_samples_from_generator()
+
+    # plot_cifar(True)
+    # plot_svhn()
