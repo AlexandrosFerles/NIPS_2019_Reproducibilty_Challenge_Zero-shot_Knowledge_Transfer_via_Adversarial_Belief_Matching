@@ -1,0 +1,48 @@
+KD_ATT with teacher WideResNet-40-2 and student WideResNet-16-1 in SVHN with M=50
+------------------- SEED 1 -------------------
+Accuracy at epoch 8001 is 65.11%
+Accuracy at epoch 8101 is 65.02%
+Accuracy at epoch 8201 is 64.97%
+Accuracy at epoch 8301 is 65.06%
+Accuracy at epoch 8401 is 65.32%
+Accuracy at epoch 8501 is 65.23%
+Accuracy at epoch 8601 is 65.31%
+Accuracy at epoch 8701 is 65.26%
+Accuracy at epoch 8801 is 65.04%
+Accuracy at epoch 8901 is 64.78%
+Accuracy at epoch 9001 is 64.96%
+Accuracy at epoch 9101 is 64.8%
+Accuracy at epoch 9201 is 65.16%
+Accuracy at epoch 9301 is 64.9%
+Accuracy at epoch 9401 is 65.07%
+Accuracy at epoch 9501 is 65.12%
+Accuracy at epoch 9601 is 65.24%
+Accuracy at epoch 9701 is 64.87%
+Accuracy at epoch 9801 is 65.31%
+Accuracy at epoch 9901 is 65.33%
+Best test set accuracy of seed 1 is 65.33
+Best test set accuracy of seed 1 is 65.33
+------------------- SEED 2 -------------------
+Accuracy at epoch 8001 is 66.45%
+Accuracy at epoch 8101 is 66.48%
+Accuracy at epoch 8201 is 66.46%
+Accuracy at epoch 8301 is 66.2%
+Accuracy at epoch 8401 is 66.43%
+Accuracy at epoch 8501 is 66.33%
+Accuracy at epoch 8601 is 66.4%
+Accuracy at epoch 8701 is 66.3%
+Accuracy at epoch 8801 is 66.33%
+Accuracy at epoch 8901 is 66.19%
+Accuracy at epoch 9001 is 66.28%
+Accuracy at epoch 9101 is 66.22%
+Accuracy at epoch 9201 is 66.17%
+Accuracy at epoch 9301 is 66.12%
+Accuracy at epoch 9401 is 66.24%
+Accuracy at epoch 9501 is 66.06%
+Accuracy at epoch 9601 is 66.08%
+Accuracy at epoch 9701 is 66.24%
+Accuracy at epoch 9801 is 65.99%
+Accuracy at epoch 9901 is 66.09%
+Best test set accuracy of seed 2 is 66.48
+Best test set accuracy of seed 2 is 66.48
+Mean test set accuracy is 65.905 with standard deviation equal to 0.5750000000000028

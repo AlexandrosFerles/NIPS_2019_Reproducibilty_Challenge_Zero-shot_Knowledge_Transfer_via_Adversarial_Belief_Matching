@@ -1,0 +1,10 @@
+No teacher WideResNet-16-1 in CIFAR10 with M=25
+------------------- SEED 1 -------------------
+Accuracy at epoch 801 is 38.0%
+Best test set accuracy of seed 1 is 38.0
+Best test set accuracy of seed 1 is 38.0
+------------------- SEED 2 -------------------
+Accuracy at epoch 801 is 36.07%
+Best test set accuracy of seed 2 is 36.07
+Best test set accuracy of seed 2 is 36.07
+Mean test set accuracy is 37.035 with standard deviation equal to 0.9649999999999999
