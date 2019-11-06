@@ -147,9 +147,11 @@ def train(args):
         set_seed(seed)
 
         if dataset.lower() == 'cifar10':
+            from utils import cifar10loaders
             _, test_loader = cifar10loaders()
 
         elif dataset.lower() == 'svhn':
+            from utils import svhnLoaders
             _, test_loader = svhnLoaders()
         else:
             raise ValueError('Datasets to choose from: CIFAR10 and SVHN')
