@@ -1,8 +1,8 @@
-# NIPS 2019 Reproducibilty Challenge "Zero-shot Knowledge Transfer via Adversarial Belief Matching"
+# NeurIPS 2019 Reproducibilty Challenge "Zero-shot Knowledge Transfer via Adversarial Belief Matching"
 
 Our code for the [Reproducibility Challenge](https://openreview.net/group?id=NeurIPS.cc/2019/Reproducibility_Challenge) of the 2019 Conference on Neural Information Processing Systems.
 
-We participate in the Replication Track with the paper [Zero-shot Knowledge Transfer via Adversarial Belief Matching
+We participate in the Replication Track with the paper [Zero-Shot Knowledge Transfer via Adversarial Belief Matching
 ](https://arxiv.org/abs/1905.09768). 
 
 ## Wide Residual Networks, Few-Shot Knowledge Distillation and Zero-Shot Knowledge Transfer
@@ -10,13 +10,13 @@ We participate in the Replication Track with the paper [Zero-shot Knowledge Tran
 The main steps of this work include re-implementation of:
 
 1. [Wide Residual Networks](https://arxiv.org/abs/1605.07146) (WRNs) that are solely used as our teacher and student networks on all knowledge transfer settings. 
-2. The spatial-attention knowledge transfer [setting](https://arxiv.org/abs/1612.03928) which we used as our main source of comparison with the paper's main method.  
+2. A spatial-attention knowledge transfer [setting](https://arxiv.org/abs/1612.03928) which we used as our main source of comparison with the paper's main method.  
 3. Zero-shot knowledge transfer as described on the paper.
-4. The adversarial belief matching metric as it was introduced on the main paper too. 
+4. A method that measures the degree of belief matching of zero-shot and few-shot as it was also introduced on the main paper. 
 
 On top of these, we manipulate the main method on what we name as 'modified zero-shot training' where we further exploit the generator network that was used on the main paper. 
 
-![ScreenShot](figs/overview.png?raw=true)
+![](figs/overview.png?raw=true)
 
 
 ## Run our experiments from scratch
@@ -86,11 +86,11 @@ Our paper [[RE] Zero-Shot Knowledge Transfer via Adversarial Belief Matching]() 
 
 ## Acknowledgements
 
-This work was initiated as a project of our master's level [course](https://www.kth.se/student/kurser/kurs/DD2412?l=en)course titled 'Deep Learning, Advanced Course' @ KTH Stockholm, Sweden. We would like to thank the course staff for providing us with the necessary Google Cloud tickets to run our (several) experiments. 
+This work was initiated as a project of our master's level [course](https://www.kth.se/student/kurser/kurs/DD2412?l=en) titled 'Deep Learning, Advanced Course' @ KTH Stockholm, Sweden. We would like to thank the course staff for providing us with the necessary Google Cloud tickets to run our (several) experiments. 
 
-Most importantly, we would like to thank the author of the original paper, [Paul Micaelli](https://github.com/polo5) for answering immediatelly all the questions that came up duing this work. 
+Most importantly, we would like to thank the authors of the original paper, [Paul Micaelli](https://github.com/polo5) for answering immediatelly all the questions that came up duing this work. 
 
 ## Members
 
-This work could not have been completed with the help and collaboration of [Alexander Nöu
+This work could not have been completed without the help and collaboration of [Alexander Nöu
 ](https://github.com/AlexLacson) and [Leonidas Valavanis](https://github.com/valavanisleonidas).   
