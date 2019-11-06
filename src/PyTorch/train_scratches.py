@@ -116,7 +116,7 @@ def train(args):
         ValueError('Datasets to choose from: CIFAR10 and SVHN')
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:2')
+        device = torch.device('cuda:0')
     else:
         device = torch.device('cpu')
 
