@@ -159,7 +159,6 @@ def adversarial_belief_matching(args):
                         pj_b = teacher_probs[0][fake_label].item()
                         pj_a = student_probs[0][fake_label].item()
 
-                        print(str(abs(pj_b-pj_a)))
                         with torch.no_grad():
                             student_probs_acc.append(pj_a)
                             teacher_probs_acc.append(pj_b)
