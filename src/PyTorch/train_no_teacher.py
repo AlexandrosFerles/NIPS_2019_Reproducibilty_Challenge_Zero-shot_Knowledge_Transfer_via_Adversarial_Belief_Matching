@@ -33,11 +33,15 @@ def _test_set_eval(net, device, test_loader):
         return accuracy
 
 
-def _train_seed_no_teacher(net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
+def _train_seed_no_teacher(net, M, loaders, device, dataset, log=False, checkpoint=False, logfile='', checkpointFile=''):
 
     train_loader, test_loader = loaders
     # or 50000 / (10*M) since M is sample per each one of 10 classes
-    epochs = int(200 * (5000 / M))
+    if dataset.lower() == 'cifar10':
+        # or 50000 / (10*M) since M is sample per each one of 10 classes
+        epochs = int(200 * (5000 / M))
+    else:
+        epochs = int(100 * (5000 / M))
     epoch_thresholds = [int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
     criterion = nn.CrossEntropyLoss()
