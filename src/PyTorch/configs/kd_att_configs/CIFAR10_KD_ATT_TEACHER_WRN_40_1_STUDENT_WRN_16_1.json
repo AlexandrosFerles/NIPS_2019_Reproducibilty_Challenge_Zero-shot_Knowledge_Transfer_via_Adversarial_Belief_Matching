@@ -6,7 +6,7 @@
     "wrn_depth_student": 16,
     "wrn_width_student": 1,
     "M": 200,
-    "seeds": "0",
+    "seeds": "012",
     "checkpoint": "True",
     "log": "True"
   }

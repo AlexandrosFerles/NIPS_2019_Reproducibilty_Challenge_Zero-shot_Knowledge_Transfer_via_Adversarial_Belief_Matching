@@ -8,6 +8,7 @@
     "M": 10,
     "seeds": "012",
     "checkpoint": "True",
-    "log": "True"
+    "log": "True",
+    "mode": "Modified"
   }
 }
