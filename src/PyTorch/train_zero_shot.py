@@ -84,27 +84,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
             torch.nn.utils.clip_grad_norm_(student_net.parameters(), 5)
             student_optimizer.step()
 
-        if M > 0:
-            train_loader, test_loader = loaders
-
-            # Train student on samples!
-            for i, data in enumerate(train_loader, 0):
-                inputs, labels = data
-                inputs = inputs.to(device)
-                labels = labels.to(device)
-
-                student_optimizer.zero_grad()
-
-                student_outputs = student_net(inputs)
-                teacher_outputs = teacher_net(inputs)
-
-                # TODO: Should I use kd-att-loss here?
-                student_loss = kd_att_loss(student_outputs, teacher_outputs, labels)
-                student_loss.backward()
-                torch.nn.utils.clip_grad_norm_(student_net.parameters(), 5)
-                student_optimizer.step()
-        else:
-            test_loader = loaders
+        test_loader = loaders
 
         if batch % 1000 == 0:
             batch_accuracy = _test_set_eval(student_net, device, test_loader)
@@ -137,7 +117,6 @@ def train(args):
     wrn_depth_student = kd_att_configurations.wrn_depth_student
     wrn_width_student = kd_att_configurations.wrn_width_student
 
-    # TODO: How to use that in few shot?
     M = kd_att_configurations.M
 
     dataset = kd_att_configurations.dataset
@@ -223,10 +202,7 @@ def train(args):
         finalCheckpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-final-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
         genCheckpointFile = 'zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-generator-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
 
-        if M > 0:
-            best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile, finalCheckpointFile, genCheckpointFile)
-        else:
-            best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, test_loader, device, log, checkpoint, logfile, checkpointFile, finalCheckpointFile, genCheckpointFile)
+        best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, test_loader, device, log, checkpoint, logfile, checkpointFile, finalCheckpointFile, genCheckpointFile)
 
         if log:
             with open(logfile, 'a') as temp:
