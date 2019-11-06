@@ -78,17 +78,17 @@ python adversarial_belief_matching.py --config configs/abm_configs/ABM_ZERO_SHOT
 
 ## Use our pre-trained models 
 
-We publicly share a Dropbox [folder](https://www.dropbox.com/sh/xuk69az4dlw26uu/AAAG2v_tgXrivL_dSHd486a9a?dl=0) with several checkpoint files for our trained model. We have also compiled a few [Google Colaboratory](colab.research.google.com) that present some of our most interesting results based on these checkpoints.   
+We publicly share a Dropbox [folder](https://www.dropbox.com/sh/xuk69az4dlw26uu/AAAG2v_tgXrivL_dSHd486a9a?dl=0) with several checkpoint files for our trained model. We have also compiled a few [Google Colaboratory](colab.research.google.com) notebooks that present some of our most interesting results based on these checkpoints. You can upload and use them (remember to enable GPU acceleration!) for inference.   
 
 ## Read our reproducibility paper
 
-Our paper [[RE] Zero-Shot Knowledge Transfer via Adversarial Belief Matching]() highlights the key points of our work towards the reproducibility of all the methods and experiments presented in the [original work](https://arxiv.org/abs/1905.09768) along with our own modifications. 
+Our paper [[RE] Zero-Shot Knowledge Transfer via Adversarial Belief Matching](https://github.com/AlexandrosFerles/NIPS_2019_Reproducibilty_Challenge_Zero-shot_Knowledge_Transfer_via_Adversarial_Belief_Matching/blob/master/%5BRE%5D%20Zero-Shot%20Knowledge%20Transfer%20via%20Adversarial%20Belief%20Matching.pdf) highlights the key points of our work towards the reproducibility of all the methods and experiments presented in the [original work](https://arxiv.org/abs/1905.09768) along with our own modifications. 
 
 ## Acknowledgements
 
 This work was initiated as a project of our master's level [course](https://www.kth.se/student/kurser/kurs/DD2412?l=en) titled 'Deep Learning, Advanced Course' @ KTH Stockholm, Sweden. We would like to thank the course staff for providing us with the necessary Google Cloud tickets to run our (several) experiments. 
 
-Most importantly, we would like to thank the authors of the original paper, [Paul Micaelli](https://github.com/polo5) for answering immediatelly all the questions that came up duing this work. 
+Most importantly, we would like to thank the authors of the original paper, [Paul Micaelli](https://github.com/polo5) and [Amos Storkey](https://homepages.inf.ed.ac.uk/amos/) for answering immediatelly all the questions that came up duing this work. 
 
 ## Members
 
