@@ -163,7 +163,7 @@ def train(args):
 
         checkpointFile = 'No_teacher_wrn-{}-{}-M-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, M, seed, dataset) if checkpoint else ''
 
-        best_test_set_accuracy = _train_seed_no_teacher(net, M, loaders, device, log, checkpoint, logfile, checkpointFile)
+        best_test_set_accuracy = _train_seed_no_teacher(net, M, loaders, device, dataset, log, checkpoint, logfile, checkpointFile)
 
         if log:
             with open(os.path.join('./', logfile), "a") as temp:
