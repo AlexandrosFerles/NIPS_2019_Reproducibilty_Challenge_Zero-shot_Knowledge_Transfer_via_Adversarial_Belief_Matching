@@ -3,9 +3,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Generator(nn.Module):
 
     def __init__(self):
+        super(Generator, self).__init__()
 
         self.activation = nn.LeakyReLU(0.2, inplace=True)
 
@@ -25,7 +27,7 @@ class Generator(nn.Module):
 
     def forward(self, z):
 
-        x = self.noise_to_linear(z).view(-1, 128, 64)
+        x = self.noise_to_linear(z).view(-1, 128, 8, 8)
         x = self.batch_norm1(x)
         x = self.up1(x)
         x = self.conv1(x)
