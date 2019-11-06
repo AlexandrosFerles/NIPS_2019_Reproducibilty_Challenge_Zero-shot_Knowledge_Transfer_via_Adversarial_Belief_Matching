@@ -4,7 +4,7 @@ from torch import optim
 import numpy as np
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
-from utils import adjust_learning_rate, kd_att_loss
+from utils import adjust_learning_rate
 from train_scratches import set_seed
 import os
 from tqdm import tqdm

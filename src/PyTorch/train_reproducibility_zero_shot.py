@@ -3,11 +3,10 @@ import torch
 from torch import optim
 import torch.nn as nn
 import numpy as np
-import random
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
 from Generator import Generator
-from utils import kd_att_loss, generator_loss, student_loss_zero_shot
+from utils import generator_loss, student_loss_zero_shot
 from train_scratches import set_seed
 from tqdm import tqdm 
 
