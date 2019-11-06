@@ -87,7 +87,7 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, loaders, devi
 
         test_loader = loaders
 
-        if batch % 1000 == 0:
+        if (batch+1) % 1000 == 0:
             batch_accuracy = _test_set_eval(student_net, device, test_loader)
 
             if log:
