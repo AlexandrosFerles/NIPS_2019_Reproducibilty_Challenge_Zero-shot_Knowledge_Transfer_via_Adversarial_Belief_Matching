@@ -10,8 +10,6 @@ from Generator import Generator
 from utils import kd_att_loss, generator_loss, student_loss_zero_shot
 from train_scratches import set_seed
 from tqdm import tqdm 
-import wandb
-wandb.init()
 
 def _test_set_eval(net, device, test_loader):
     with torch.no_grad():
@@ -82,15 +80,10 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
 
             student_loss = student_loss_zero_shot(student_outputs, teacher_outputs)
             student_loss.backward()
-            wandb.log({"Student loss": student_loss})
             # Likewise!
             torch.nn.utils.clip_grad_norm_(student_net.parameters(), 5)
             student_optimizer.step()
 
-        # TODO: Suppose that M is > 0, how and when should the extra samples participate?
-        # TODO: Let's assume that the training comes after the student update on generator's samples!
-
-        # TODO: Make sure that only test loader is added with M = 0 in train seed function
         if M > 0:
             train_loader, test_loader = loaders
 
@@ -116,7 +109,6 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, d
         if batch % 1000 == 0:
             batch_accuracy = _test_set_eval(student_net, device, test_loader)
 
-            wandb.log({"Batch accuracy": batch_accuracy})
             if log:
                 with open(logfile, 'a') as temp:
                     temp.write('Accuracy at batch {} is {}%\n'.format(batch + 1, batch_accuracy))
