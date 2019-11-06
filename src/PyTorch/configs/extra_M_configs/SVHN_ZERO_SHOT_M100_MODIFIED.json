@@ -5,10 +5,10 @@
     "wrn_width_teacher": 2,
     "wrn_depth_student": 16,
     "wrn_width_student": 1,
-    "M": 75,
-    "seeds": "2",
+    "M": 100,
+    "seeds": "012",
     "checkpoint": "True",
     "log": "True",
-    "mode": "Reproducibility"
+    "mode": "Modified"
   }
 }
