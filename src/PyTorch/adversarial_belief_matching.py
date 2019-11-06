@@ -62,7 +62,7 @@ def _load_teacher_and_student(abm_configurations, seed, device):
                 map_location=device)
         else:
             raise ValueError('Dataset not found')
-    el    if mode.lower() == 'zero-shot':
+    elif mode.lower() == 'zero-shot':
         if dataset.lower() == 'cifar10':
             torch_checkpoint = torch.load(
                 './PreTrainedModels/Zero-Shot/CIFAR10/reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-CIFAR10-dict.pth'.format(
