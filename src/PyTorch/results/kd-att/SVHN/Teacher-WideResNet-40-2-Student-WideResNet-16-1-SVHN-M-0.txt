@@ -1,5 +1,0 @@
-KD_ATT with teacher WideResNet-40-2 and student WideResNet-16-1 in SVHN with M=0
-------------------- SEED 0 -------------------
-------------------- SEED 1 -------------------
-------------------- SEED 2 -------------------
-Mean test set accuracy is 9.153333333333334 with standard deviation equal to 1.765452412902206
