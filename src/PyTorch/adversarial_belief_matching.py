@@ -1,10 +1,7 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
-from matplotlib import pyplot as plt
-import pickle
 import os
 from utils import json_file_to_pyobj, get_matching_indices
 from WideResNet import WideResNet
