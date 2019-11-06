@@ -33,7 +33,7 @@ def _test_set_eval(net, device, test_loader):
         return accuracy
 
 
-def _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile='', finalCheckpointFile='', genCheckpointFile=''):
+def _train_seed_zero_shot(teacher_net, student_net, generator_net, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile='', finalCheckpointFile='', genCheckpointFile=''):
 
     # Hardcoded values from paper and script training files of official GitHub repo!
     ng = 1
@@ -147,33 +147,10 @@ def train(args):
         set_seed(seed)
 
         if dataset.lower() == 'cifar10':
-
-            # Full data
-            if M == 5000:
-                from utils import cifar10loaders
-                loaders = cifar10loaders()
-            # No data
-            elif M == 0:
-                from utils import cifar10loaders
-                _, test_loader = cifar10loaders()
-            else:
-                from utils import cifar10loadersM
-                loaders = cifar10loadersM(M)
+            _, test_loader = cifar10loaders()
 
         elif dataset.lower() == 'svhn':
-
-            # Full data
-            if M == 5000:
-                from utils import svhnLoaders
-                loaders = svhnLoaders()
-            # No data
-            elif M == 0:
-                from utils import svhnLoaders
-                _, test_loader = svhnLoaders()
-            else:
-                from utils import svhnloadersM
-                loaders = svhnloadersM(M)
-
+            _, test_loader = svhnLoaders()
         else:
             raise ValueError('Datasets to choose from: CIFAR10 and SVHN')
 
@@ -203,10 +180,7 @@ def train(args):
         finalCheckpointFile = 'reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-final-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
         genCheckpointFile = 'reproducibility_zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-{}-seed-{}-{}-generator-dict.pth'.format(wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, M, seed, dataset) if checkpoint else ''
 
-        if M > 0:
-            best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, loaders, device, log, checkpoint, logfile, checkpointFile, finalCheckpointFile, genCheckpointFile)
-        else:
-            best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, M, test_loader, device, log, checkpoint, logfile, checkpointFile, finalCheckpointFile, genCheckpointFile)
+        best_test_set_accuracy = _train_seed_zero_shot(teacher_net, student_net, generator_net, test_loader, device, log, checkpoint, logfile, checkpointFile, finalCheckpointFile, genCheckpointFile)
 
         if log:
             with open(logfile, 'a') as temp:
