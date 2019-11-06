@@ -7,6 +7,7 @@ import random
 from utils import json_file_to_pyobj
 from WideResNet import WideResNet
 from utils import adjust_learning_rate
+from tqdm import tqdm
 
 
 def set_seed(seed=42):
@@ -17,16 +18,22 @@ def set_seed(seed=42):
     torch.cuda.manual_seed(seed)
 
 
-def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', checkpointFile=''):
+def _train_seed(net, loaders, device, dataset, log=False, checkpoint=False, logfile='', checkpointFile=''):
     train_loader, test_loader = loaders
-    epochs = 200
+
+    if dataset.lower()=='cifar10':
+        epochs = 200
+    else:
+        epochs=100
+
+    epoch_thresholds=[int(x) for x in [0.3*epochs, 0.6*epochs, 0.8*epochs]]
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr=0.1, momentum=0.9, nesterov=True, weight_decay=5e-4)
 
     best_test_set_accuracy = 0
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
 
         net.train()
         for i, data in enumerate(train_loader, 0):
@@ -42,36 +49,37 @@ def _train_seed(net, loaders, device, log=False, checkpoint=False, logfile='', c
             loss.backward()
             optimizer.step()
 
-        optimizer = adjust_learning_rate(optimizer, epoch + 1)
+        optimizer = adjust_learning_rate(optimizer, epoch + 1, epoch_thresholds)
 
-        with torch.no_grad():
+        if epoch >= epoch_thresholds[-1]:
+            with torch.no_grad():
 
-            correct = 0
-            total = 0
+                correct = 0
+                total = 0
 
-            net.eval()
-            for data in test_loader:
-                images, labels = data
-                images = images.to(device)
-                labels = labels.to(device)
+                net.eval()
+                for data in test_loader:
+                    images, labels = data
+                    images = images.to(device)
+                    labels = labels.to(device)
 
-                wrn_outputs = net(images)
-                outputs = wrn_outputs[0]
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
+                    wrn_outputs = net(images)
+                    outputs = wrn_outputs[0]
+                    _, predicted = torch.max(outputs.data, 1)
+                    total += labels.size(0)
+                    correct += (predicted == labels).sum().item()
 
-            epoch_accuracy = correct / total
-            epoch_accuracy = round(100 * epoch_accuracy, 2)
+                epoch_accuracy = correct / total
+                epoch_accuracy = round(100 * epoch_accuracy, 2)
 
-            if log:
-                with open(logfile, 'a') as temp:
-                    temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
+                if log:
+                    with open(logfile, 'a') as temp:
+                        temp.write('Accuracy at epoch {} is {}%\n'.format(epoch + 1, epoch_accuracy))
 
-            if epoch_accuracy > best_test_set_accuracy:
-                best_test_set_accuracy = epoch_accuracy
-                if checkpoint:
-                    torch.save(net.state_dict(), checkpointFile)
+                if epoch_accuracy > best_test_set_accuracy:
+                    best_test_set_accuracy = epoch_accuracy
+                    if checkpoint:
+                        torch.save(net.state_dict(), checkpointFile)
 
     return best_test_set_accuracy
 
@@ -95,12 +103,12 @@ def train(args):
 
     checkpoint = bool(training_configurations.checkpoint)
 
-    if dataset == 'cifar10':
+    if dataset.lower() == 'cifar10':
 
         from utils import cifar10loaders
         loaders = cifar10loaders()
 
-    elif dataset == 'svhn':
+    elif dataset.lower() == 'svhn':
 
         from utils import svhnLoaders
         loaders = svhnLoaders()
@@ -108,7 +116,7 @@ def train(args):
         ValueError('Datasets to choose from: CIFAR10 and SVHN')
 
     if torch.cuda.is_available():
-        device = torch.device('cuda:2')
+        device = torch.device('cuda:0')
     else:
         device = torch.device('cpu')
 
@@ -126,7 +134,7 @@ def train(args):
         net = net.to(device)
 
         checkpointFile = '_wrn-{}-{}-seed-{}-{}-dict.pth'.format(wrn_depth, wrn_width, dataset, seed) if checkpoint else ''
-        best_test_set_accuracy = _train_seed(net, loaders, device, log, checkpoint, logfile, checkpointFile)
+        best_test_set_accuracy = _train_seed(net, loaders, device, dataset, log, checkpoint, logfile, checkpointFile)
 
         if log:
             with open(logfile, 'a') as temp:

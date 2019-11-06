@@ -55,10 +55,10 @@ def cifar10loaders(train_batch_size=128, test_batch_size=10):
     transform_train, transform_test = dataset_transforms('cifar10')
 
     trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=False, num_workers=4)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=train_batch_size, shuffle=True, num_workers=0)
 
     testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=False, num_workers=4)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=test_batch_size, shuffle=True, num_workers=0)
 
     return trainloader, testloader
 
@@ -132,8 +132,8 @@ def svhnloadersM(M, train_batch_size=128, test_batch_size=10, apply_test=False):
     total_collected = 0
     success = 10 * M
     indices = []
-
-    for index, (_, label) in enumerate(temp_trainloader):
+    
+	for index, (_, label) in enumerate(temp_trainloader):
         if data_collected[label] < M:
             data_collected[label] += 1
             indices.append(index)
@@ -214,6 +214,8 @@ def adjust_learning_rate(optimizer, epoch, epoch_thresholds=[60, 120, 160]):
         for param_group in optimizer.param_groups:
             param_group["lr"] = param_group["lr"] / 5
     elif epoch == epoch_thresholds[2]:
+    
+	if epoch == epoch_thresholds[0] or epoch == epoch_thresholds[1] or epoch == epoch_thresholds[2]:
         for param_group in optimizer.param_groups:
             param_group["lr"] = param_group["lr"] / 5
 
@@ -239,9 +241,11 @@ def kd_att_loss(student_outputs, teacher_outputs, labels, T=4, a=0.9, b=1000, cr
 
     loss_term1 = (1 - a) * criterion1(student_out, labels)
     # changed to log softmax for student_out and 2a for loss_term2 after inspection of the official code
-    loss_term2 = criterion2(F.log_softmax(student_out / T, dim=1), F.softmax(teacher_out / T, dim=1))
+    
+	loss_term2 = criterion2(F.log_softmax(student_out / T, dim=1), F.softmax(teacher_out / T, dim=1))
     loss_term2 *= (T ** 2) * 2 * a
-    attention_losses = [attention_loss(att1, att2) for (att1, att2) in activation_pairs]
+    
+	attention_losses = [attention_loss(att1, att2) for (att1, att2) in activation_pairs]
     loss_term3 = b * sum(attention_losses)
 
     return loss_term1 + loss_term2 + loss_term3
@@ -421,8 +425,3 @@ def plot_svhn():
                                 zero_shot=zero_shot, title='SVHN')
 
 
-if __name__ == '__main__':
-    # plot_samples_from_generator()
-
-    plot_cifar(True)
-    # plot_svhn()

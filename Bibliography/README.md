@@ -1,6 +1,6 @@
 # Bibliography
 
-Some of the most interesting papers cited in 'Zero-shot Knowledge Transfer via Adversarial Belief Matching'
+Some of the most interesting papers cited in 'Zero-shot Knowledge Transfer via Adversarial Belief Matching':
 
 1. [Variational Information Distillation for Knowledge Transfer](https://arxiv.org/abs/1904.05835): Listed as recent SoTA work in Few-Shot learning. 
 
@@ -18,3 +18,4 @@ Some of the most interesting papers cited in 'Zero-shot Knowledge Transfer via A
 
 8. [Wide Residual Networks](https://arxiv.org/abs/1605.07146): Wide ResNets used in the main papers in different variants as teacher and Student architectures.  
 
+Our re-implementation of the main methods was based on papers 7 and 8, which we include along with the main paper. 
