@@ -16,8 +16,8 @@ The main steps of this work include re-implementation of:
 
 On top of these, we manipulate the main method on what we name as 'modified zero-shot training' where we further exploit the generator network that was used on the main paper. 
 
-![Alt text](figs/overview.png?raw=true)
- 
+![](figs/overview.png?raw=true)
+
 
 ## Run our experiments from scratch
 
