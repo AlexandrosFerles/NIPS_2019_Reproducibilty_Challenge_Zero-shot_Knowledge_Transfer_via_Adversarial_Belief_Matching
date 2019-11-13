@@ -24,7 +24,7 @@ On top of these, we manipulate the main method on what we name as 'modified zero
 For all the experiments listed on the main report and its 'Appendix' section, we provide the corresponding configuration files in JSON format so that you can re-train a Wide ResNet of your choice under the same circumstances as we did. 
 Feel free to manipulate the config files to run your own experiments. 
 
-Additionally, we have provided all necessary pre-trained documents needed for the experiments (WRN scratches, zero-shot and few-shot trained models for extra experiments and adversarial belief matching) in the 'PreTrainedModels' folder.  The folder structure has already been taken care of, so please note that changing a file location requires an assignemnt of different file paths in the training codes. 
+Additionally, we have provided all necessary pre-trained documents needed for the experiments (WRN scratches, zero-shot and few-shot trained models for extra experiments and adversarial belief matching) in the 'PreTrainedModels' folder.  The folder structure has already been taken care of, so please note that changing a file location requires an assignment of different file paths in the training codes. 
 
 ### Example runs
 
