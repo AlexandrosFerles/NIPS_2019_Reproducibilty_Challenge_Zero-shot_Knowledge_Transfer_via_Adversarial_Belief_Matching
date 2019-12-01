@@ -9,6 +9,7 @@
     "seeds": "0",
     "checkpoint": "True",
     "log": "True",
-	"mode": "Zero-Shot"
+    "mode": "Zero-Shot",
+    "eval_teacher": "False"
   }
 }

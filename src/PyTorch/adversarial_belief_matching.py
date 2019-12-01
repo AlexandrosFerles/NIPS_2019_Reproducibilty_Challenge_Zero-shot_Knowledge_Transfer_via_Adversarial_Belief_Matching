@@ -1,13 +1,15 @@
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
+from matplotlib import pyplot as plt
+import pickle
 import os
 from utils import json_file_to_pyobj, get_matching_indices
 from WideResNet import WideResNet
 from copy import deepcopy
 from tqdm import tqdm
-
 
 def _load_teacher_and_student(abm_configurations, seed, device):
     wrn_depth_teacher = abm_configurations.wrn_depth_teacher
@@ -72,6 +74,14 @@ def _load_teacher_and_student(abm_configurations, seed, device):
                 map_location=device)
         else:
             raise ValueError('Dataset not found')
+    else:
+        if dataset.lower() == 'cifar10':
+            torch_checkpoint = torch.load(
+                './PreTrainedModels/Modified-Zero-Shot/CIFAR10/zero_shot_teacher_wrn-{}-{}_student_wrn-{}-{}-M-0-seed-{}-CIFAR10-dict.pth'.format(
+                    wrn_depth_teacher, wrn_width_teacher, wrn_depth_student, wrn_width_student, seed),
+                map_location=device)
+        else:
+            raise ValueError('Dataset not found')
 
     student_net.load_state_dict(torch_checkpoint)
 
@@ -91,8 +101,10 @@ def adversarial_belief_matching(args):
     seeds = abm_configurations.seeds
     mode = abm_configurations.mode
 
+    eval_teacher = True if abm_configurations.eval_teacher.lower() == 'true' else False 
+
     if torch.cuda.is_available():
-        device = torch.device('cuda:3')
+        device = torch.device('cuda:0')
     else:
         device = torch.device('cpu')
 
@@ -125,7 +137,6 @@ def adversarial_belief_matching(args):
             teacher_outputs = teacher_net(images)[0]
             _, teacher_predicted = torch.max(teacher_outputs.data, 1)
 
-
             x0 = deepcopy(images.detach())
             student_transition_curves, teacher_transition_curves = [], []
 
@@ -140,15 +151,26 @@ def adversarial_belief_matching(args):
                     x_adv.requires_grad = True
 
                     for _ in range(K):
-                        student_fake_outputs = student_net(x_adv)[0]
-                        with torch.no_grad():
+                        if eval_teacher:
                             teacher_fake_outputs = teacher_net(x_adv)[0]
-                        loss = criterion(student_fake_outputs, fake_label)
+                            with torch.no_grad():
+                                student_fake_outputs = student_net(x_adv)[0]
+                            loss = criterion(teacher_fake_outputs, fake_label)
 
-                        student_net.zero_grad()
-                        loss.backward()
-                        x_adv.data -= eta * x_adv.grad.data
-                        x_adv.grad.data.zero_()
+                            teacher_net.zero_grad()
+                            loss.backward()
+                            x_adv.data -= eta * x_adv.grad.data
+                            x_adv.grad.data.zero_()
+                        else:
+                            student_fake_outputs = student_net(x_adv)[0]
+                            with torch.no_grad():
+                                teacher_fake_outputs = teacher_net(x_adv)[0]
+                            loss = criterion(student_fake_outputs, fake_label)
+
+                            student_net.zero_grad()
+                            loss.backward()
+                            x_adv.data -= eta * x_adv.grad.data
+                            x_adv.grad.data.zero_()
 
                         teacher_probs = F.softmax(teacher_fake_outputs, dim=1)
                         student_probs = F.softmax(student_fake_outputs, dim=1)

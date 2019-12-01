@@ -10,6 +10,6 @@
     "checkpoint": "True",
     "log": "True",
     "mode": "Zero-Shot", 
-    "eval_teacher": "False"
+    "eval_teacher": "True"
   }
 }

@@ -1,6 +1,6 @@
 {
   "abm_setting":{
-    "dataset": "CIFAR10",
+    "dataset": "SVHN",
     "wrn_depth_teacher": 40,
     "wrn_width_teacher": 2,
     "wrn_depth_student": 16,
@@ -9,7 +9,7 @@
     "seeds": "0",
     "checkpoint": "True",
     "log": "True",
-    "mode": "Zero-Shot", 
-    "eval_teacher": "False"
+    "mode": "KD-ATT",
+    "eval_teacher": "True"
   }
 }

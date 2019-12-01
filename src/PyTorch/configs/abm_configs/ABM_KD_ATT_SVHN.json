@@ -9,6 +9,7 @@
     "seeds": "0",
     "checkpoint": "True",
     "log": "True",
-	"mode": "KD-ATT"
+    "mode": "KD-ATT",
+    "eval_teacher": "False"
   }
 }
