@@ -98,7 +98,7 @@ def train(args):
 
     dataset = kd_att_configurations.dataset
     seeds = [int(seed) for seed in kd_att_configurations.seeds]
-    log = bool(kd_att_configurations.checkpoint)
+    log = True if kd_att_configurations.log.lower() == 'True' else False
 
     if log:
         teacher_str = "WideResNet-{}-{}".format(wrn_depth_teacher, wrn_width_teacher)

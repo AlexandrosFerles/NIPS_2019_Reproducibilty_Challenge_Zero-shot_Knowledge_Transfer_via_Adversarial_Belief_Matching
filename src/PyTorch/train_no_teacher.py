@@ -89,26 +89,26 @@ def _train_seed_no_teacher(net, M, loaders, device, dataset, log=False, checkpoi
 def train(args):
 
     json_options = json_file_to_pyobj(args.config)
-    kd_att_configurations = json_options.training
+    no_teacher_configurations = json_options.training
 
-    wrn_depth = kd_att_configurations.wrn_depth
-    wrn_width = kd_att_configurations.wrn_width
+    wrn_depth = no_teacher_configurations.wrn_depth
+    wrn_width = no_teacher_configurations.wrn_width
 
-    M = kd_att_configurations.M
+    M = no_teacher_configurations.M
 
-    dataset = kd_att_configurations.dataset
-    seeds = [int(seed) for seed in kd_att_configurations.seeds]
-    log = bool(kd_att_configurations.checkpoint)
+    dataset = no_teacher_configurations.dataset
+    seeds = [int(seed) for seed in no_teacher_configurations.seeds]
+    log = True if no_teacher_configurations.log.lower() == 'True' else False
 
     if log:
         net_str = "WideResNet-{}-{}".format(wrn_depth, wrn_width)
-        logfile = "No_Teacher-{}-{}-M-{}.txt".format(net_str, kd_att_configurations.dataset, M)
+        logfile = "No_Teacher-{}-{}-M-{}.txt".format(net_str, no_teacher_configurations.dataset, M)
         with open(os.path.join('./', logfile), "w") as temp:
-            temp.write('No teacher {} in {} with M={}\n'.format(net_str, kd_att_configurations.dataset, M))
+            temp.write('No teacher {} in {} with M={}\n'.format(net_str, no_teacher_configurations.dataset, M))
     else:
         logfile = ''
 
-    checkpoint = bool(kd_att_configurations.checkpoint)
+    checkpoint = bool(no_teacher_configurations.checkpoint)
 
     if torch.cuda.is_available():
         device = torch.device('cuda:0')

@@ -110,29 +110,29 @@ def _train_seed_zero_shot(teacher_net, student_net, generator_net, loaders, devi
 def train(args):
 
     json_options = json_file_to_pyobj(args.config)
-    kd_att_configurations = json_options.training
+    zero_shot_configurations = json_options.training
 
-    wrn_depth_teacher = kd_att_configurations.wrn_depth_teacher
-    wrn_width_teacher = kd_att_configurations.wrn_width_teacher
-    wrn_depth_student = kd_att_configurations.wrn_depth_student
-    wrn_width_student = kd_att_configurations.wrn_width_student
+    wrn_depth_teacher = zero_shot_configurations.wrn_depth_teacher
+    wrn_width_teacher = zero_shot_configurations.wrn_width_teacher
+    wrn_depth_student = zero_shot_configurations.wrn_depth_student
+    wrn_width_student = zero_shot_configurations.wrn_width_student
 
-    M = kd_att_configurations.M
+    M = zero_shot_configurations.M
 
-    dataset = kd_att_configurations.dataset
-    seeds = [int(seed) for seed in kd_att_configurations.seeds]
-    log = bool(kd_att_configurations.checkpoint)
+    dataset = zero_shot_configurations.dataset
+    seeds = [int(seed) for seed in zero_shot_configurations.seeds]
+    log = True if zero_shot_configurations.log.lower() == 'True' else False
 
     if log:
         teacher_str = 'WideResNet-{}-{}'.format(wrn_depth_teacher, wrn_width_teacher)
         student_str = 'WideResNet-{}-{}'.format(wrn_depth_student, wrn_width_student)
-        logfile = 'Reproducibility_Teacher-{}-Student-{}-{}-M-{}-Zero-Shot.txt'.format(teacher_str, student_str, kd_att_configurations.dataset, M)
+        logfile = 'Reproducibility_Teacher-{}-Student-{}-{}-M-{}-Zero-Shot.txt'.format(teacher_str, student_str, zero_shot_configurations.dataset, M)
         with open(logfile, 'w') as temp:
-            temp.write('Zero-Shot with teacher {} and student {} in {} with M-{}\n'.format(teacher_str, student_str, kd_att_configurations.dataset, M))
+            temp.write('Zero-Shot with teacher {} and student {} in {} with M-{}\n'.format(teacher_str, student_str, zero_shot_configurations.dataset, M))
     else:
         logfile = ''
 
-    checkpoint = bool(kd_att_configurations.checkpoint)
+    checkpoint = bool(zero_shot_configurations.checkpoint)
 
     if torch.cuda.is_available():
         device = torch.device('cuda:0')
@@ -148,7 +148,6 @@ def train(args):
         if dataset.lower() == 'cifar10':
             from utils import cifar10loaders
             _, test_loader = cifar10loaders()
-
         elif dataset.lower() == 'svhn':
             from utils import svhnLoaders
             _, test_loader = svhnLoaders()

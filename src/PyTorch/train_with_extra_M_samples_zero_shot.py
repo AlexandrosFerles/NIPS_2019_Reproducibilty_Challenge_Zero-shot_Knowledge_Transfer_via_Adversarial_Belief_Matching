@@ -102,7 +102,7 @@ def train(args):
 
     dataset = extra_M_configuration.dataset
     seeds = [int(seed) for seed in extra_M_configuration.seeds]
-    log = bool(extra_M_configuration.checkpoint)
+    log = True if extra_M_configuration.log.lower() == 'True' else False
 
     if dataset.lower() == 'cifar10':
         epochs = 200

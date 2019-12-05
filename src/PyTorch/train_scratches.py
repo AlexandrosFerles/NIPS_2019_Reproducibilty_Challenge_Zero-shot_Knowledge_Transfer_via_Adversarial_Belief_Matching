@@ -92,7 +92,7 @@ def train(args):
     wrn_width = training_configurations.wrn_width
     dataset = training_configurations.dataset.lower()
     seeds = [int(seed) for seed in training_configurations.seeds]
-    log = bool(training_configurations.checkpoint)
+    log = True if training_configurations.log.lower() == 'True' else False
 
     if log:
         logfile = training_configurations.logfile
@@ -101,7 +101,7 @@ def train(args):
     else:
         logfile = ''
 
-    checkpoint = bool(training_configurations.checkpoint)
+    checkpoint = True if training_configurations.checkpoint.lower() == 'true' else False
 
     if dataset.lower() == 'cifar10':
 
