@@ -78,7 +78,7 @@ python adversarial_belief_matching.py --config configs/abm_configs/ABM_ZERO_SHOT
 
 ## Use our pre-trained models 
 
-We publicly share a Dropbox [folder](https://www.dropbox.com/sh/xuk69az4dlw26uu/AAAG2v_tgXrivL_dSHd486a9a?dl=0) with several checkpoint files for our trained model. We have also compiled a few [Google Colaboratory](colab.research.google.com) notebooks that present some of our most interesting results based on these checkpoints. You can upload and use them (remember to enable GPU acceleration!) for inference.   
+We publicly share a Dropbox [folder](https://www.dropbox.com/sh/xuk69az4dlw26uu/AAAG2v_tgXrivL_dSHd486a9a?dl=0) with several checkpoint files for our trained model. We have also compiled a few [Google Colaboratory](https://colab.research.google.com) notebooks that present some of our most interesting results based on these checkpoints. You can upload and use them (remember to enable GPU acceleration!) for inference.   
 
 ## Read our reproducibility paper
 
