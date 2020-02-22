@@ -2,8 +2,11 @@
 
 Our code for the [Reproducibility Challenge](https://openreview.net/group?id=NeurIPS.cc/2019/Reproducibility_Challenge) of the 2019 Conference on Neural Information Processing Systems.
 
-We participate in the Replication Track with the paper [Zero-Shot Knowledge Transfer via Adversarial Belief Matching
+We participate in the Baseline Track with the paper [Zero-Shot Knowledge Transfer via Adversarial Belief Matching
 ](https://arxiv.org/abs/1905.09768). 
+
+Update: Our work was accepted from the NeurIPS 2019 Reproducibility Challenge Program Chairs and is under publication!
+[Open Review Link](https://openreview.net/forum?id=B1gZ8acM6S)
 
 ## Wide Residual Networks, Few-Shot Knowledge Distillation and Zero-Shot Knowledge Transfer
 
