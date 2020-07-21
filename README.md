@@ -6,7 +6,7 @@ We participate in the Baseline Track with the paper [Zero-Shot Knowledge Transfe
 ](https://arxiv.org/abs/1905.09768). 
 
 Update: Our work was accepted from the NeurIPS 2019 Reproducibility Challenge Program Chairs and is under publication!
-[Open Review Link](https://openreview.net/forum?id=B1gZ8acM6S)
+[Journal Publication](http://rescience.github.io/bibliography/Ferles_2020.html) [Open Review](https://openreview.net/forum?id=B1gZ8acM6S)
 
 ## Wide Residual Networks, Few-Shot Knowledge Distillation and Zero-Shot Knowledge Transfer
 
