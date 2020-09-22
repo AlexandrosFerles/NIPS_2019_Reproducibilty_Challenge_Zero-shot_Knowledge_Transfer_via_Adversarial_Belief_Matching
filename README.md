@@ -91,7 +91,7 @@ Our paper [[RE] Zero-Shot Knowledge Transfer via Adversarial Belief Matching](ht
 
 This work was initiated as a project of our master's level [course](https://www.kth.se/student/kurser/kurs/DD2412?l=en) titled 'Deep Learning, Advanced Course' @ KTH Stockholm, Sweden. We would like to thank the course staff for providing us with the necessary Google Cloud tickets to run our (several) experiments. 
 
-Most importantly, we would like to thank the authors of the original paper, [Paul Micaelli](https://github.com/polo5) and [Amos Storkey](https://homepages.inf.ed.ac.uk/amos/) for answering immediatelly all the questions that came up during this work. 
+Most importantly, we would like to thank the authors of the original paper, [Paul Micaelli](https://github.com/polo5) and [Amos Storkey](https://homepages.inf.ed.ac.uk/amos/) for answering immediately all the questions that came up during this work. 
 
 ## Members
 
